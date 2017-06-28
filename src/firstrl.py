@@ -3,7 +3,6 @@ from player import player
 
 SCREEN_WIDTH  = 80
 SCREEN_HEIGHT = 50
-LIMIT_FPS     = 20
 playerx = SCREEN_WIDTH//2
 playery = SCREEN_HEIGHT//2
 
@@ -30,6 +29,10 @@ def main():
     libtcod.console_init_root(SCREEN_WIDTH, SCREEN_HEIGHT, 'Wrath of Exuleb', False)
     con = libtcod.console_new(SCREEN_WIDTH, SCREEN_HEIGHT)
     plr = player(playerx, playery, libtcod.BKGND_NONE)
+    #draw the initial screen
+    plr.draw(con)
+    libtcod.console_blit(con, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0)
+    libtcod.console_flush()
     while not libtcod.console_is_window_closed():
         libtcod.console_set_default_foreground(con, libtcod.white)
         exit = handle_keys(plr)
