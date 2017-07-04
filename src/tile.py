@@ -1,4 +1,4 @@
-class tile:
+class Tile:
     #A map tile
     def __init__(self, blocked, block_sight = None):
         self.blocked = blocked

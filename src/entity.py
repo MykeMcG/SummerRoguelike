@@ -1,6 +1,7 @@
 import libtcodpy as libtcod
+from tile import Tile
 
-class entity:
+class Entity:
     #A generic object [player, monster, item, stairs, etc.]
     #It is always represented by a character on screen.
     def __init__(self, x, y, char, color, background):
@@ -10,9 +11,10 @@ class entity:
         self.color      = color
         self.background = background
 
-    def move(self, delta_x, delta_y):
-        self.x += delta_x
-        self.y += delta_y
+    def move(self, delta_x, delta_y, map_tiles):
+        if not map_tiles[self.x + delta_x][self.y + delta_y].blocked:
+            self.x += delta_x
+            self.y += delta_y
 
     def draw(self, console):
         #set the color and draw the character representing the object
