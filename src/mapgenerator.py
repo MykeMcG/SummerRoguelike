@@ -1,5 +1,7 @@
+import libtcodpy as libtcod
 from tile import Tile
 from rect import Rect
+from entity import Entity
 
 class MapGenerator:
     def __init__(self):
@@ -27,12 +29,39 @@ class MapGenerator:
             out_map[x][y].blocked = False
             out_map[x][y].block_sight = False
 
-    def generate(self, width, height):
+    def generate(self, width, height, room_min_size, room_max_size, max_rooms, player):
         new_map = self._generate_empty_map(width, height)
-        room1 = Rect(20, 15, 10, 15)
-        room2 = Rect(50, 15, 10, 15)
-        self._create_room(room1, new_map)
-        self._create_room(room2, new_map)
-        self._create_h_tunnel(25, 55, 23, new_map)
+        rooms = []
+        num_rooms = 0
+        for r in range(max_rooms):
+            w = libtcod.random_get_int(0, room_min_size, room_max_size)
+            h = libtcod.random_get_int(0, room_min_size, room_max_size)
+            x = libtcod.random_get_int(0, 0, width - w - 1)
+            y = libtcod.random_get_int(0, 0, height - h - 1)
+            new_room = Rect(x, y, w, h)
+
+            failed = False
+            for old_room in rooms:
+                if new_room.intersect(old_room):
+                    failed = True
+                    break
+            if not failed:
+                self._create_room(new_room, new_map)
+                (new_x, new_y) = new_room.center()
+                if num_rooms == 0:
+                    player.x = new_x
+                    player.y = new_y
+                else:
+                    #Dig the tunnels
+                    (prev_x, prev_y) = rooms[num_rooms - 1].center()
+                    #Flip a coin to see if we go horizontally then vertically, or vice-versa
+                    if libtcod.random_get_int(0, 0, 1) == 1:
+                        self._create_h_tunnel(prev_x, new_x, prev_y, new_map)
+                        self._create_v_tunnel(new_x, prev_y, new_y, new_map)
+                    else:
+                        self._create_v_tunnel(prev_x, prev_y, new_y, new_map)
+                        self._create_h_tunnel(prev_x, new_x, new_y, new_map)
+                rooms.append(new_room)
+                num_rooms += 1
         return new_map
 

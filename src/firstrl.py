@@ -11,6 +11,9 @@ MAP_WIDTH = 80
 MAP_HEIGHT = 45
 color_dark_wall = libtcod.Color(0, 0, 100)
 color_dark_ground = libtcod.Color(50, 50, 150)
+ROOM_MAX_SIZE = 10
+ROOM_MIN_SIZE = 6
+MAX_ROOMS = 50
 game_map = None;
 
 def handle_keys(player):
@@ -46,11 +49,10 @@ def main():
     libtcod.console_init_root(SCREEN_WIDTH, SCREEN_HEIGHT, 'Wrath of Exuleb', False)
     con = libtcod.console_new(SCREEN_WIDTH, SCREEN_HEIGHT)
     player = Entity(playerx, playery, '@', libtcod.white, libtcod.BKGND_NONE)
-    npc = Entity(playerx, playery + 5, '@', libtcod.green, libtcod.BKGND_NONE)
-    objects = [npc, player]
+    objects = [player]
     map_gen = MapGenerator()
     global game_map
-    game_map = map_gen.generate(MAP_WIDTH, MAP_HEIGHT)
+    game_map = map_gen.generate(MAP_WIDTH, MAP_HEIGHT, ROOM_MIN_SIZE, ROOM_MAX_SIZE, MAX_ROOMS, player)
     while not libtcod.console_is_window_closed():
         render_all(con, game_map, objects)
         libtcod.console_blit(con, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0)
