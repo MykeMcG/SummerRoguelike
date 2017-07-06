@@ -3,7 +3,7 @@ from tile import Tile
 from rect import Rect
 from entity import Entity
 
-class MapGenerator:
+class BasicMapGenerator:
     def __init__(self):
         return
 
@@ -29,7 +29,7 @@ class MapGenerator:
             out_map[x][y].blocked = False
             out_map[x][y].block_sight = False
 
-    def generate(self, width, height, room_min_size, room_max_size, max_rooms, player):
+    def generate_map(self, width, height, room_min_size, room_max_size, max_rooms, player):
         new_map = self._generate_empty_map(width, height)
         rooms = []
         num_rooms = 0

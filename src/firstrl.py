@@ -1,6 +1,6 @@
 import libtcodpy as libtcod
 from entity import Entity
-from mapgenerator import MapGenerator
+from bspmapgenerator import BspMapGenerator
 
 SCREEN_WIDTH  = 80
 SCREEN_HEIGHT = 50
@@ -50,9 +50,9 @@ def main():
     con = libtcod.console_new(SCREEN_WIDTH, SCREEN_HEIGHT)
     player = Entity(playerx, playery, '@', libtcod.white, libtcod.BKGND_NONE)
     objects = [player]
-    map_gen = MapGenerator()
+    map_gen = BspMapGenerator(MAP_WIDTH, MAP_HEIGHT, ROOM_MIN_SIZE, 10, False, player)
     global game_map
-    game_map = map_gen.generate(MAP_WIDTH, MAP_HEIGHT, ROOM_MIN_SIZE, ROOM_MAX_SIZE, MAX_ROOMS, player)
+    game_map = map_gen.generate_map()
     while not libtcod.console_is_window_closed():
         render_all(con, game_map, objects)
         libtcod.console_blit(con, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0)
