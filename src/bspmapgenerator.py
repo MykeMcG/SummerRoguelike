@@ -63,10 +63,10 @@ class BspMapGenerator:
                 maxy -= 1
 
             if self.full_rooms == False:
-                minx = libtcod.random_get_int(None, minx, maxx - self.min_size + 1)
-                miny = libtcod.random_get_int(None, miny, maxy - self.min_size + 1)
-                maxx = libtcod.random_get_int(None, minx + self.min_size - 2, maxx)
-                maxy = libtcod.random_get_int(None, miny + self.min_size - 2, maxy)
+                minx = libtcod.random_get_int(None, minx, maxx - self.min_room_size + 1)
+                miny = libtcod.random_get_int(None, miny, maxy - self.min_room_size + 1)
+                maxx = libtcod.random_get_int(None, minx + self.min_room_size - 2, maxx)
+                maxy = libtcod.random_get_int(None, miny + self.min_room_size - 2, maxy)
 
             node.x = minx
             node.y = miny
@@ -111,7 +111,7 @@ class BspMapGenerator:
                     self._hline_right(x + 1, y2)
                 else:
                     miny = max(left.y, right.y)
-                    maxy = max(left.y + left.h - 1, right.y + right.h  - 1)
+                    maxy = max(left.y + left.h - 1, right.y + right.h - 1)
                     y = libtcod.random_get_int(None, miny, maxy)
                     self._hline_left(right.x - 1, y)
                     self._hline_right(right.x, y)
@@ -132,8 +132,8 @@ class BspMapGenerator:
     
         player_room = random.choice(self._rooms)
         self._rooms.remove(player_room)
-        player.x = player_room[0]
-        player.y = player_room[1]
+        self.player.x = player_room[0]
+        self.player.y = player_room[1]
 
         #TODO: generate monsters, items, etc.
         return self._map

@@ -12,7 +12,7 @@ MAP_HEIGHT = 45
 color_dark_wall = libtcod.Color(0, 0, 100)
 color_dark_ground = libtcod.Color(50, 50, 150)
 ROOM_MAX_SIZE = 10
-ROOM_MIN_SIZE = 6
+ROOM_MIN_SIZE = 4
 MAX_ROOMS = 50
 game_map = None;
 
