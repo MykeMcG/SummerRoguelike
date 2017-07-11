@@ -4,18 +4,19 @@
 
 At [r/roguelikedev](https://www.reddit.com/r/roguelikedev/) we're doing a dev-along following [The Complete Roguelike Tutorial](http://www.roguebasin.com/index.php?title=Complete_Roguelike_Tutorial,_using_python%2Blibtcod).
 
-## If you would like to participate on GitHub
+## How to run
 
-* [Sign up for a free personal account](https://github.com/signup/free) if you don't already have one.
-* Fork [this repository](https://github.com/aaron-santos/roguelikedev-does-the-complete-roguelike-tutorial) to your account.
-* Clone the repository on your computer and follow the tutorial.
-* Follow along with the [weekly posts](https://www.reddit.com/r/roguelikedev/search?q=TCRT&restrict_sr=on).
-* Update the `README.md` file to include a description of your game, how/where to play/download it, how to build/compile it, what dependencies it has, etc.
-* Share your game on the final week.
+Ensure you have the x64 version of Python 3.6.1 or higher installed properly.
 
-## It's dangerous to go alone <img src="https://octodex.github.com/images/linktocat.jpg" height="40">
+Run this in your terminal:
 
-If you're **new to Git, GitHub, or version control**…
+```
+git clone https://github.com/MykeMcG/SummerRoguelike
+cd SummerRoguelike
+python firstrl.py
+```
 
-* [Git Documentation](https://git-scm.com/documentation) - everything you need to know about version control, and how to get started with Git.
-* [GitHub Help](https://help.github.com/) - everything you need to know about GitHub.
+
+## Dependencies
+
+* Python 3.6.1 x64 or higher
