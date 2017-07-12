@@ -54,7 +54,7 @@ def render_wall(con, terrain_map, x, y, color, background):
     #TODO: Think of a better way to do this
     #TODO: Improve outside walls
     #TODO: Fix IndexError
-    if y + 1 > MAP_HEIGHT:
+    if y + 1 >= MAP_HEIGHT:
         north = False
     else:
         north = terrain_map[x][y + 1].blocked
@@ -62,7 +62,7 @@ def render_wall(con, terrain_map, x, y, color, background):
         south = False
     else:
         south = terrain_map[x][y - 1].blocked
-    if x + 1 > MAP_WIDTH:
+    if x + 1 >= MAP_WIDTH:
         west = False
     else:
         west  = terrain_map[x + 1][y].blocked
@@ -129,7 +129,7 @@ def generate_fov_map(width, height, terrain_map):
 
 
 def main():
-    libtcod.console_set_custom_font('arial12x12.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD)
+    libtcod.console_set_custom_font('terminal8x8_2x_gs_ro.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW)
     libtcod.console_init_root(SCREEN_WIDTH, SCREEN_HEIGHT, 'Wrath of Exuleb', False)
     con = libtcod.console_new(SCREEN_WIDTH, SCREEN_HEIGHT)
     player = Entity(playerx, playery, '@', libtcod.white, libtcod.BKGND_NONE)
