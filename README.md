@@ -6,7 +6,7 @@ At [r/roguelikedev](https://www.reddit.com/r/roguelikedev/) we're doing a dev-al
 
 ## How to run
 
-Ensure you have the x64 version of Python 3.6.1 or higher installed properly.
+Ensure you have Python version 3.6.1 or higher installed properly.
 
 Run this in your terminal:
 
@@ -19,4 +19,4 @@ python firstrl.py
 
 ## Dependencies
 
-* Python 3.6.1 x64 or higher
+* Python 3.6.1 or higher
