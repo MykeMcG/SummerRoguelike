@@ -32,7 +32,7 @@ class BspMapGenerator:
             y += 1
     
     def _hline(self, x1, y, x2):
-        if y1 > y2:
+        if x1 > x2:
             x1,x2 = x2,x1
         for x in range (x1, x2 + 1):
             self._map[x][y].blocked     = False

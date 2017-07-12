@@ -16,10 +16,11 @@ class Entity:
             self.x += delta_x
             self.y += delta_y
 
-    def draw(self, console):
-        #set the color and draw the character representing the object
-        libtcod.console_set_default_foreground(console, self.color)
-        libtcod.console_put_char(console, self.x, self.y, self.char, self.background)
+    def draw(self, console, fov_map):
+        if libtcod.map_is_in_fov(fov_map, self.x, self.y):
+            #set the color and draw the character representing the object
+            libtcod.console_set_default_foreground(console, self.color)
+            libtcod.console_put_char(console, self.x, self.y, self.char, self.background)
 
     def clear(self, console):
         #erase the character representing the object
