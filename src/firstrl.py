@@ -129,7 +129,7 @@ def generate_fov_map(width, height, terrain_map):
 
 
 def main():
-    libtcod.console_set_custom_font('terminal8x8_2x_gs_ro.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW)
+    libtcod.console_set_custom_font('tiles.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW)
     libtcod.console_init_root(SCREEN_WIDTH, SCREEN_HEIGHT, 'Wrath of Exuleb', False)
     con = libtcod.console_new(SCREEN_WIDTH, SCREEN_HEIGHT)
     player = Entity(playerx, playery, '@', libtcod.white, libtcod.BKGND_NONE)
