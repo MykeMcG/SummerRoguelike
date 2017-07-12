@@ -12,7 +12,7 @@ Run this in your terminal:
 
 ```
 git clone https://github.com/MykeMcG/SummerRoguelike
-cd SummerRoguelike
+cd SummerRoguelike/src
 python firstrl.py
 ```
 
