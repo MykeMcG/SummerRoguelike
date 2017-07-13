@@ -13,16 +13,17 @@ ROOM_MIN_SIZE = 6
 MAX_ROOMS = 50
 terrain_map = None
 
-color_dark_wall = libtcod.Color(0, 0, 100)
-color_light_wall = libtcod.Color(130, 110, 50)
-color_dark_ground = libtcod.Color(50, 50, 150)
-color_light_ground = libtcod.Color(200, 180, 50)
+color_dark_wall    = libtcod.Color(  0,   0, 100)
+color_light_wall   = libtcod.Color(130, 110,  50)
+color_dark_ground  = libtcod.Color( 50,  50, 150)
+color_light_ground = libtcod.Color(200, 180,  50)
 
 FOV_ALGORITHM = 1
 FOV_LIGHT_WALLS = True
 TORCH_RADIUS = 10
 
-DEBUG_DISABLE_FOW = False
+DEBUG = True
+debug_show_whole_map = False
 
 fov_recompute = True
 
@@ -34,6 +35,9 @@ def handle_keys(player):
         libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen())
     elif key.vk == libtcod.KEY_ESCAPE:
         return True  # exit game
+    elif key.vk == libtcod.KEY_F1 and DEBUG:
+        global debug_show_whole_map
+        debug_show_whole_map = not debug_show_whole_map #Toggle debug_show_whole_map
     # movement keys
     global fov_recompute
     if libtcod.console_is_key_pressed(libtcod.KEY_UP):
@@ -53,7 +57,6 @@ def handle_keys(player):
 def render_wall(con, terrain_map, x, y, color, background):
     #TODO: Think of a better way to do this
     #TODO: Improve outside walls
-    #TODO: Fix IndexError
     if y + 1 >= MAP_HEIGHT:
         north = False
     else:
@@ -102,10 +105,13 @@ def render_wall(con, terrain_map, x, y, color, background):
 def render_all(con, terrain_map, fov_map, objects):
     for y in range(MAP_HEIGHT):
         for x in range(MAP_WIDTH):
-            visible = libtcod.map_is_in_fov(fov_map, x, y)
+            if debug_show_whole_map:
+                visible = True
+            else:
+                visible = libtcod.map_is_in_fov(fov_map, x, y)
             wall = terrain_map[x][y].block_sight
             if not visible:
-                if terrain_map[x][y].explored or DEBUG_DISABLE_FOW:
+                if terrain_map[x][y].explored or debug_show_whole_map:
                     if wall:
                         render_wall(con, terrain_map, x, y, color_dark_wall, libtcod.BKGND_SET)
                     else:
