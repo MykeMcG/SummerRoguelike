@@ -85,8 +85,8 @@ class BspMapGenerator:
             right  = libtcod.bsp_right(node)
             node.x = min(left.x, right.x)
             node.y = min(left.y, right.y)
-            node.w = max(left.x + left.w, right.x + right.w)
-            node.h = max(left.y + left.h, right.y + right.h)
+            node.w = max(left.x + left.w, right.x + right.w) - node.x
+            node.h = max(left.y + left.h, right.y + right.h) - node.y
             if node.horizontal:
                 if left.x + left.w - 1 < right.x or right.x + right.w - 1 < left.x:
                     x1 = libtcod.random_get_int(None, left.x, left.x + left.w - 1)
