@@ -135,7 +135,7 @@ class BspMapGenerator:
             if libtcod.random_get_int(0, 0, 100) < 80:
                 monster = mobs.Skeleton(x, y, libtcod.BKGND_NONE)
             else:
-                monster = mobs.Orc(x, y, libtcod.BKGND_NONE)
+                monster = mobs.Kobold(x, y, libtcod.BKGND_NONE)
             if not monster.is_blocked(x, y, self._map, self.objects):
                 self.objects.append(monster)
 

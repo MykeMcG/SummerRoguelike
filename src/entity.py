@@ -4,9 +4,10 @@ from tile import Tile
 class Entity:
     #A generic object [player, monster, item, stairs, etc.]
     #It is always represented by a character on screen.
-    def __init__(self, x, y, char, color, background, blocks):
+    def __init__(self, x, y, name, char, color, background, blocks):
         self.x          = x
         self.y          = y
+        self.name       = name
         self.char       = char
         self.color      = color
         self.background = background

@@ -1,5 +1,6 @@
 import libtcodpy as libtcod
 from entity import Entity
+from player import Player
 from bspmapgenerator import BspMapGenerator
 
 #Constants
@@ -18,9 +19,9 @@ DEBUG = True
 debug_show_whole_map = False
 
 #Colors
-color_dark_wall    = libtcod.Color(  0,   0, 100)
+color_dark_wall    = libtcod.Color( 50,  50, 150)
+color_dark_ground  = libtcod.Color(  0,   0, 100)
 color_light_wall   = libtcod.Color(204, 204, 204)
-color_dark_ground  = libtcod.Color( 50,  50, 150)
 color_light_ground = libtcod.Color( 33,  33,  33)
 
 #Map Options
@@ -34,6 +35,8 @@ objects           = None
 max_room_monsters = 2
 terrain_map       = None
 fov_recompute     = True
+game_state        = 'playing'
+player_action     = None
 
 
 def handle_keys(player):
@@ -42,24 +45,27 @@ def handle_keys(player):
         # Alt+Enter: toggle fullscreen
         libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen())
     elif key.vk == libtcod.KEY_ESCAPE:
-        return True  # exit game
+        return 'exit'  # exit game
     elif key.vk == libtcod.KEY_F1 and DEBUG:
         global debug_show_whole_map
         debug_show_whole_map = not debug_show_whole_map #Toggle debug_show_whole_map
-    # movement keys
-    global fov_recompute
-    if libtcod.console_is_key_pressed(libtcod.KEY_UP):
-        player.move(0, -1, terrain_map, objects)
-        fov_recompute = True
-    elif libtcod.console_is_key_pressed(libtcod.KEY_DOWN):
-        player.move(0, 1, terrain_map, objects)
-        fov_recompute = True
-    elif libtcod.console_is_key_pressed(libtcod.KEY_LEFT):
-        player.move(-1, 0, terrain_map, objects)
-        fov_recompute = True
-    elif libtcod.console_is_key_pressed(libtcod.KEY_RIGHT):
-        player.move(1, 0, terrain_map, objects)
-        fov_recompute = True
+    if game_state == 'playing':
+        # movement keys
+        global fov_recompute
+        if libtcod.console_is_key_pressed(libtcod.KEY_UP):
+            player.move_or_attack(0, -1, terrain_map, objects)
+            fov_recompute = True
+        elif libtcod.console_is_key_pressed(libtcod.KEY_DOWN):
+            player.move_or_attack(0, 1, terrain_map, objects)
+            fov_recompute = True
+        elif libtcod.console_is_key_pressed(libtcod.KEY_LEFT):
+            player.move_or_attack(-1, 0, terrain_map, objects)
+            fov_recompute = True
+        elif libtcod.console_is_key_pressed(libtcod.KEY_RIGHT):
+            player.move_or_attack(1, 0, terrain_map, objects)
+            fov_recompute = True
+        else:
+            return 'didnt-take-turn'
 
 
 def render_wall(con, terrain_map, x, y, color, background):
@@ -109,7 +115,6 @@ def render_wall(con, terrain_map, x, y, color, background):
     libtcod.console_set_char(con, x, y, wall_char)
 
 
-
 def render_all(con, terrain_map, fov_map, objects):
     for y in range(MAP_HEIGHT):
         for x in range(MAP_WIDTH):
@@ -146,7 +151,7 @@ def main():
     libtcod.console_set_custom_font('tiles.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW)
     libtcod.console_init_root(SCREEN_WIDTH, SCREEN_HEIGHT, 'Wrath of Exuleb', False)
     con     = libtcod.console_new(SCREEN_WIDTH, SCREEN_HEIGHT)
-    player  = Entity(playerx, playery, '@', libtcod.white, libtcod.BKGND_NONE, True)
+    player  = Player(playerx, playery)
     global objects
     objects = [player]
     map_gen = BspMapGenerator(MAP_WIDTH, MAP_HEIGHT, ROOM_MIN_SIZE, BSP_RECURSION_DEPTH, BSP_FULL_ROOMS, max_room_monsters, player)
@@ -166,9 +171,16 @@ def main():
         for object in objects:
             object.clear(con)
         libtcod.console_set_default_foreground(con, libtcod.white)
-        exit = handle_keys(player)
-        if exit:
+        global player_action
+        player_action = handle_keys(player)
+        if player_action == 'exit':
             break
+        if game_state == 'playing' and player_action != 'didnt-take-turn':
+            for o in objects:
+                if o != player:
+                    #TODO: Implement enemy AI
+                    pass
+
 
 
 if __name__ == '__main__':
