@@ -2,30 +2,38 @@ import libtcodpy as libtcod
 from entity import Entity
 from bspmapgenerator import BspMapGenerator
 
-SCREEN_WIDTH = 80
-SCREEN_HEIGHT = 50
-playerx = 25
-playery = 23
-objects = None
-MAP_WIDTH = 80
-MAP_HEIGHT = 45
-ROOM_MIN_SIZE = 6
-MAX_ROOMS = 50
-terrain_map = None
-
-color_dark_wall    = libtcod.Color(  0,   0, 100)
-color_light_wall   = libtcod.Color(130, 110,  50)
-color_dark_ground  = libtcod.Color( 50,  50, 150)
-color_light_ground = libtcod.Color(200, 180,  50)
-
-FOV_ALGORITHM = 1
+#Constants
+SCREEN_WIDTH    = 80
+SCREEN_HEIGHT   = 50
+MAP_WIDTH       = 80
+MAP_HEIGHT      = 45
+ROOM_MIN_SIZE   = 6
+MAX_ROOMS       = 50
+FOV_ALGORITHM   = 1
 FOV_LIGHT_WALLS = True
-TORCH_RADIUS = 10
+TORCH_RADIUS    = 10
 
+#Debug Flags
 DEBUG = True
 debug_show_whole_map = False
 
-fov_recompute = True
+#Colors
+color_dark_wall    = libtcod.Color(  0,   0, 100)
+color_light_wall   = libtcod.Color(204, 204, 204)
+color_dark_ground  = libtcod.Color( 50,  50, 150)
+color_light_ground = libtcod.Color( 33,  33,  33)
+
+#Map Options
+BSP_RECURSION_DEPTH = 30
+BSP_FULL_ROOMS      = False
+
+#Game Variables
+playerx           = None
+playery           = None
+objects           = None
+max_room_monsters = 2
+terrain_map       = None
+fov_recompute     = True
 
 
 def handle_keys(player):
@@ -41,16 +49,16 @@ def handle_keys(player):
     # movement keys
     global fov_recompute
     if libtcod.console_is_key_pressed(libtcod.KEY_UP):
-        player.move(0, -1, terrain_map)
+        player.move(0, -1, terrain_map, objects)
         fov_recompute = True
     elif libtcod.console_is_key_pressed(libtcod.KEY_DOWN):
-        player.move(0, 1, terrain_map)
+        player.move(0, 1, terrain_map, objects)
         fov_recompute = True
     elif libtcod.console_is_key_pressed(libtcod.KEY_LEFT):
-        player.move(-1, 0, terrain_map)
+        player.move(-1, 0, terrain_map, objects)
         fov_recompute = True
     elif libtcod.console_is_key_pressed(libtcod.KEY_RIGHT):
-        player.move(1, 0, terrain_map)
+        player.move(1, 0, terrain_map, objects)
         fov_recompute = True
 
 
@@ -123,7 +131,7 @@ def render_all(con, terrain_map, fov_map, objects):
                     libtcod.console_set_char_background(con, x, y, color_light_ground, libtcod.BKGND_SET)
                 terrain_map[x][y].explored = True
     for object in objects:
-        object.draw(con, fov_map)
+        object.draw(con, fov_map, debug_show_whole_map)
 
 
 def generate_fov_map(width, height, terrain_map):
@@ -137,12 +145,15 @@ def generate_fov_map(width, height, terrain_map):
 def main():
     libtcod.console_set_custom_font('tiles.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW)
     libtcod.console_init_root(SCREEN_WIDTH, SCREEN_HEIGHT, 'Wrath of Exuleb', False)
-    con = libtcod.console_new(SCREEN_WIDTH, SCREEN_HEIGHT)
-    player = Entity(playerx, playery, '@', libtcod.white, libtcod.BKGND_NONE)
+    con     = libtcod.console_new(SCREEN_WIDTH, SCREEN_HEIGHT)
+    player  = Entity(playerx, playery, '@', libtcod.white, libtcod.BKGND_NONE, True)
+    global objects
     objects = [player]
-    map_gen = BspMapGenerator(MAP_WIDTH, MAP_HEIGHT, ROOM_MIN_SIZE, 5, False, player)
+    map_gen = BspMapGenerator(MAP_WIDTH, MAP_HEIGHT, ROOM_MIN_SIZE, BSP_RECURSION_DEPTH, BSP_FULL_ROOMS, max_room_monsters, player)
     global terrain_map
     terrain_map = map_gen.generate_map()
+    for o in map_gen.objects:
+        objects.append(o)
     fov_map = generate_fov_map(MAP_WIDTH, MAP_HEIGHT, terrain_map)
     while not libtcod.console_is_window_closed():
         global fov_recompute

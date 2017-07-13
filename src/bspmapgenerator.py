@@ -1,16 +1,20 @@
 import libtcodpy as libtcod
 import random
 from tile import Tile
+import mobs
 
 class BspMapGenerator:
-    def __init__(self, map_width, map_height, min_room_size, generation_depth, full_rooms, player):
+    def __init__(self, map_width, map_height, min_room_size, generation_depth, full_rooms, max_room_monsters, player):
         self.map_width        = map_width
         self.map_height       = map_height
         self.min_room_size    = min_room_size
         self.generation_depth = generation_depth
         self.full_rooms       = full_rooms
+        self.max_room_monsters = max_room_monsters
         self.player           = player
+        self.objects          = []
         self._map             = []
+
 
     def _vline(self, x, y1, y2):
         if y1 > y2:
@@ -79,6 +83,7 @@ class BspMapGenerator:
                     self._map[x][y].blocked     = False
                     self._map[x][y].block_sight = False
             self._rooms.append(((minx + maxx) // 2, (miny + maxy) // 2))
+            self._place_objects(minx, miny, maxx, maxy)
         #Create corridor
         else:
             left   = libtcod.bsp_left(node)
@@ -121,6 +126,20 @@ class BspMapGenerator:
         self._map = [[Tile(True) for y in range(self.map_height)] for x in range(self.map_width)]
         return self._map
 
+
+    def _place_objects(self, x1, y1, x2, y2):
+        num_monsters = libtcod.random_get_int(0, 0, self.max_room_monsters)
+        for i in range(num_monsters):
+            x = libtcod.random_get_int(0, x1, x2)
+            y = libtcod.random_get_int(0, y1, y2)
+            if libtcod.random_get_int(0, 0, 100) < 80:
+                monster = mobs.Skeleton(x, y, libtcod.BKGND_NONE)
+            else:
+                monster = mobs.Orc(x, y, libtcod.BKGND_NONE)
+            if not monster.is_blocked(x, y, self._map, self.objects):
+                self.objects.append(monster)
+
+
     def generate_map(self):
         self._map   = self._generate_empty_map()
         self._rooms = []
@@ -135,7 +154,6 @@ class BspMapGenerator:
         self.player.x = player_room[0]
         self.player.y = player_room[1]
 
-        #TODO: generate monsters, items, etc.
         return self._map
 
 
