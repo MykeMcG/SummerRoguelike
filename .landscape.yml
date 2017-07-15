@@ -1,0 +1,6 @@
+python targets:
+    - 3
+strictness: veryhigh
+ignorepaths:
+    - src/libtcodpy
+
