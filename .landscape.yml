@@ -1,6 +1,6 @@
-python targets:
+python-targets:
     - 3
 strictness: veryhigh
-ignorepaths:
+ignore-paths:
     - src/libtcodpy
 
