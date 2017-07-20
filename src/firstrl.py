@@ -148,20 +148,18 @@ def generate_fov_map(width, height, terrain_map):
 
 
 def main():
+    global objects, terrain_map, fov_recompute, player
     libtcod.console_set_custom_font('tiles.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW)
     libtcod.console_init_root(SCREEN_WIDTH, SCREEN_HEIGHT, 'Wrath of Exuleb', False)
     con     = libtcod.console_new(SCREEN_WIDTH, SCREEN_HEIGHT)
     player  = Player(playerx, playery)
-    global objects
     objects = [player]
     map_gen = BspMapGenerator(MAP_WIDTH, MAP_HEIGHT, ROOM_MIN_SIZE, BSP_RECURSION_DEPTH, BSP_FULL_ROOMS, max_room_monsters, player)
-    global terrain_map
     terrain_map = map_gen.generate_map()
     for o in map_gen.objects:
         objects.append(o)
     fov_map = generate_fov_map(MAP_WIDTH, MAP_HEIGHT, terrain_map)
     while not libtcod.console_is_window_closed():
-        global fov_recompute
         if fov_recompute:
             fov_recompute = False
             libtcod.map_compute_fov(fov_map, player.x, player.y, TORCH_RADIUS, FOV_LIGHT_WALLS, FOV_ALGORITHM)
@@ -171,17 +169,13 @@ def main():
         for object in objects:
             object.clear(con)
         libtcod.console_set_default_foreground(con, libtcod.white)
-        global player_action
         player_action = handle_keys(player)
         if player_action == 'exit':
             break
         if game_state == 'playing' and player_action != 'didnt-take-turn':
             for o in objects:
-                if o != player:
-                    #TODO: Implement enemy AI
-                    pass
-
-
+                if o.ai != None:
+                    o.ai.take_turn(fov_map, terrain_map, objects, player)
 
 if __name__ == '__main__':
     main()
