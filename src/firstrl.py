@@ -2,12 +2,13 @@ import libtcodpy as libtcod
 from player import Player
 from entityList import EntityList
 from bspmapgenerator import BspMapGenerator
+from messagePanel import MessagePanel
 
 # Constants
 SCREEN_WIDTH = 80
 SCREEN_HEIGHT = 50
 MAP_WIDTH = 80
-MAP_HEIGHT = 45
+MAP_HEIGHT = 43
 ROOM_MIN_SIZE = 6
 MAX_ROOMS = 50
 FOV_ALGORITHM = 1
@@ -28,6 +29,14 @@ COLOR_LIGHT_GROUND = libtcod.Color(33, 33, 33)
 BSP_RECURSION_DEPTH = 30
 BSP_FULL_ROOMS = False
 
+# UI Options
+BAR_WIDTH = 20
+PANEL_HEIGHT = 7
+PANEL_Y = SCREEN_HEIGHT - PANEL_HEIGHT
+MSG_X = BAR_WIDTH + 2
+MSG_WIDTH = (SCREEN_WIDTH - BAR_WIDTH - 2) - 1
+MSG_HEIGHT = PANEL_HEIGHT - 1
+
 # Game Variables
 PlayerX = None
 PlayerY = None
@@ -37,6 +46,7 @@ MapTiles = None
 FovRecompute = True
 GameState = 'playing'
 PlayerAction = None
+MessageLog = []
 
 def handle_keys(player):
     key = libtcod.console_wait_for_keypress(True)
@@ -112,7 +122,7 @@ def render_wall(con, x, y, color):
     libtcod.console_set_char_foreground(con, x, y, color)
     libtcod.console_set_char(con, x, y, wall_char)
 
-def render_all(con, fov_map):
+def render_all(con, stats_panel, message_panel, fov_map, player):
     for y in range(MAP_HEIGHT):
         for x in range(MAP_WIDTH):
             if DebugShowWholeMap:
@@ -133,8 +143,19 @@ def render_all(con, fov_map):
                     libtcod.console_set_char_background(con, x, y, COLOR_LIGHT_GROUND, libtcod.BKGND_SET)
                 MapTiles[x][y].explored = True
     for object in Objects:
-
         object.draw(con, fov_map, DebugShowWholeMap)
+    libtcod.console_blit(con, 0, 0, MAP_WIDTH, MAP_HEIGHT, 0, 0, 0)
+
+    # Prepare to render the GUI stats_panel
+    libtcod.console_set_default_background(stats_panel, libtcod.black)
+    libtcod.console_clear(stats_panel)
+
+    # Render the player stats
+    render_bar(stats_panel, 1, 1, BAR_WIDTH, 'HP', player.fighter.hp, player.fighter.max_hp, libtcod.red, libtcod.darker_red)
+    libtcod.console_blit(stats_panel, 0, 0, SCREEN_WIDTH, PANEL_HEIGHT, 0, 0, PANEL_Y)
+
+    # Render the message log
+    libtcod.console_blit(message_panel.render(), 0, 0, message_panel.width, message_panel.height, 0, MSG_X, PANEL_Y)
 
 def generate_fov_map(width, height):
     fov_map = libtcod.map_new(width, height)
@@ -143,11 +164,32 @@ def generate_fov_map(width, height):
             libtcod.map_set_properties(fov_map, x, y, not MapTiles[x][y].block_sight, not MapTiles[x][y].blocked)
     return fov_map
 
+def render_bar(panel, x, y, total_width, name, value, maximum, bar_color, back_color, fore_color=libtcod.white ):
+    bar_width = int(float(value) / maximum * total_width)
+
+    # Render the background
+    libtcod.console_set_default_background(panel, back_color)
+    libtcod.console_rect(panel, x, y, total_width, 1, False, libtcod.BKGND_SCREEN)
+
+    # Render the filled section of the bar
+    libtcod.console_set_default_background(panel, bar_color)
+    if bar_width > 0:
+        libtcod.console_rect(panel, x, y, bar_width, 1, False, libtcod.BKGND_SCREEN)
+
+    # Render centered text containing the actual value
+    libtcod.console_set_default_foreground(panel, fore_color)
+    label = '{}: {}/{}'.format(name, value.__str__(), maximum.__str__())
+    bar_center = x + total_width // 2
+    libtcod.console_print_ex(panel, bar_center, y, libtcod.BKGND_NONE, libtcod.CENTER, label)
+
 def main():
     global Objects, MapTiles, FovRecompute, PlayerAction
     libtcod.console_set_custom_font('tiles.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW)
     libtcod.console_init_root(SCREEN_WIDTH, SCREEN_HEIGHT, 'Wrath of Exuleb', False)
     con = libtcod.console_new(SCREEN_WIDTH, SCREEN_HEIGHT)
+    stat_panel = libtcod.console_new(SCREEN_WIDTH, PANEL_HEIGHT)
+    message_panel = MessagePanel(MSG_WIDTH, MSG_HEIGHT)
+    message_panel.append("Welcome, mortal, to the Tomb of Exlueb! Here is a bunch of filler text")
     player = Player(PlayerX, PlayerY)
     Objects.append(player)
     map_gen = BspMapGenerator(MAP_WIDTH, MAP_HEIGHT, ROOM_MIN_SIZE, BSP_RECURSION_DEPTH, BSP_FULL_ROOMS, MAX_ROOM_MONSTERS, player)
@@ -159,8 +201,7 @@ def main():
         if FovRecompute:
             FovRecompute = False
             libtcod.map_compute_fov(fov_map, player.x, player.y, TORCH_RADIUS, FOV_LIGHT_WALLS, FOV_ALGORITHM)
-        render_all(con, fov_map)
-        libtcod.console_blit(con, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0)
+        render_all(con, stat_panel, message_panel, fov_map, player)
         libtcod.console_flush()
         for obj in Objects:
             obj.clear(con)
