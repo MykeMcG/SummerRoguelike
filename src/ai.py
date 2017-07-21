@@ -8,7 +8,7 @@ class BasicMonster:
             if monster.distance_to(player) >= 2:
                 monster.move_towards(player.x, player.y, map_tiles, objects)
             elif player.fighter.hp > 0:
-                print('The ' + monster.name + ' attacks! Miss!')
+                monster.fighter.attack(player, objects)
 
 
 class CowardMonster:
@@ -19,4 +19,4 @@ class CowardMonster:
             if monster.distance_to(player) >= 2:
                 monster.move_away(player.x, player.y, map_tiles, objects)
             elif player.fighter.hp > 0:
-                print('The ' + monster.name + ' attacks! Miss!')
+                monster.fighter.attack(player, objects)

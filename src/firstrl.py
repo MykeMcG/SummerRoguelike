@@ -1,5 +1,6 @@
 import libtcodpy as libtcod
 from player import Player
+from entityList import EntityList
 from bspmapgenerator import BspMapGenerator
 
 # Constants
@@ -30,13 +31,12 @@ BSP_FULL_ROOMS = False
 # Game Variables
 PlayerX = None
 PlayerY = None
-Objects = None
+Objects = EntityList()
 MAX_ROOM_MONSTERS = 2
 MapTiles = None
 FovRecompute = True
 GameState = 'playing'
 PlayerAction = None
-
 
 def handle_keys(player):
     key = libtcod.console_wait_for_keypress(True)
@@ -65,7 +65,6 @@ def handle_keys(player):
             FovRecompute = True
         else:
             return 'didnt-take-turn'
-
 
 def render_wall(con, x, y, color):
     #TODO: Think of a better way to do this
@@ -113,7 +112,6 @@ def render_wall(con, x, y, color):
     libtcod.console_set_char_foreground(con, x, y, color)
     libtcod.console_set_char(con, x, y, wall_char)
 
-
 def render_all(con, fov_map):
     for y in range(MAP_HEIGHT):
         for x in range(MAP_WIDTH):
@@ -135,8 +133,8 @@ def render_all(con, fov_map):
                     libtcod.console_set_char_background(con, x, y, COLOR_LIGHT_GROUND, libtcod.BKGND_SET)
                 MapTiles[x][y].explored = True
     for object in Objects:
-        object.draw(con, fov_map, DebugShowWholeMap)
 
+        object.draw(con, fov_map, DebugShowWholeMap)
 
 def generate_fov_map(width, height):
     fov_map = libtcod.map_new(width, height)
@@ -145,14 +143,13 @@ def generate_fov_map(width, height):
             libtcod.map_set_properties(fov_map, x, y, not MapTiles[x][y].block_sight, not MapTiles[x][y].blocked)
     return fov_map
 
-
 def main():
     global Objects, MapTiles, FovRecompute, PlayerAction
     libtcod.console_set_custom_font('tiles.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW)
     libtcod.console_init_root(SCREEN_WIDTH, SCREEN_HEIGHT, 'Wrath of Exuleb', False)
     con = libtcod.console_new(SCREEN_WIDTH, SCREEN_HEIGHT)
     player = Player(PlayerX, PlayerY)
-    Objects = [player]
+    Objects.append(player)
     map_gen = BspMapGenerator(MAP_WIDTH, MAP_HEIGHT, ROOM_MIN_SIZE, BSP_RECURSION_DEPTH, BSP_FULL_ROOMS, MAX_ROOM_MONSTERS, player)
     MapTiles = map_gen.generate_map()
     for obj in map_gen.objects:
