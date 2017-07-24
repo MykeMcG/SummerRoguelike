@@ -8,7 +8,7 @@ class Player(Entity):
         super(Player, self).__init__(x, y, 'player', '@', libtcod.white, libtcod.BKGND_NONE, True, fighter_component)
 
     # TODO: Figure out a way to change the game state when the player dies
-    def move_or_attack(self, delta_x, delta_y, map_tiles, map_objects):
+    def move_or_attack(self, delta_x, delta_y, map_tiles, map_objects, message_panel):
         x = self.x + delta_x
         y = self.y + delta_y
         target = None
@@ -16,6 +16,6 @@ class Player(Entity):
             if obj.fighter is not None and obj.x == x and obj.y == y:
                 target = obj
         if target != None:
-            self.fighter.attack(target, map_objects)
+            self.fighter.attack(target, map_objects, message_panel)
         else:
             self.move(delta_x, delta_y, map_tiles, map_objects)
