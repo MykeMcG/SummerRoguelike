@@ -2,36 +2,38 @@ import libtcodpy as libtcod
 import random
 from tile import Tile
 import mobs
+import items
+from entityList import EntityList
 
 class BspMapGenerator:
-    def __init__(self, map_width, map_height, min_room_size, generation_depth, full_rooms, max_room_monsters, player):
-        self.map_width        = map_width
-        self.map_height       = map_height
-        self.min_room_size    = min_room_size
+    def __init__(self, map_width, map_height, min_room_size, generation_depth, full_rooms, max_room_monsters, max_room_items, player):
+        self.map_width = map_width
+        self.map_height = map_height
+        self.min_room_size = min_room_size
         self.generation_depth = generation_depth
-        self.full_rooms       = full_rooms
+        self.full_rooms = full_rooms
         self.max_room_monsters = max_room_monsters
-        self.player           = player
-        self.objects          = []
-        self._map             = []
-
+        self.max_room_items = max_room_items
+        self.player = player
+        self.objects = EntityList()
+        self._map = []
 
     def _vline(self, x, y1, y2):
         if y1 > y2:
             y1,y2 = y2,y1
         for y in range (y1, y2 + 1):
-            self._map[x][y].blocked     = False
+            self._map[x][y].blocked = False
             self._map[x][y].block_sight = False
     
     def _vline_up(self, x, y):
         while y >= 0 and self._map[x][y].blocked == True:
-            self._map[x][y].blocked     = False
+            self._map[x][y].blocked = False
             self._map[x][y].block_sight = False
             y -= 1
 
     def _vline_down(self, x, y):
         while y < self.map_height and self._map[x][y].blocked == True:
-            self._map[x][y].blocked     = False
+            self._map[x][y].blocked = False
             self._map[x][y].block_sight = False
             y += 1
     
@@ -39,18 +41,18 @@ class BspMapGenerator:
         if x1 > x2:
             x1,x2 = x2,x1
         for x in range (x1, x2 + 1):
-            self._map[x][y].blocked     = False
+            self._map[x][y].blocked = False
             self._map[x][y].block_sight = False
     
     def _hline_left(self, x, y):
         while x >= 0 and self._map[x][y].blocked == True:
-            self._map[x][y].blocked     = False
+            self._map[x][y].blocked = False
             self._map[x][y].block_sight = False
             x -= 1
 
     def _hline_right(self, x, y):
         while x < self.map_width and self._map[x][y].blocked == True:
-            self._map[x][y].blocked     = False
+            self._map[x][y].blocked = False
             self._map[x][y].block_sight = False
             x += 1
 
@@ -126,12 +128,11 @@ class BspMapGenerator:
         self._map = [[Tile(True) for y in range(self.map_height)] for x in range(self.map_width)]
         return self._map
 
-
     def _place_objects(self, x1, y1, x2, y2):
         num_monsters = libtcod.random_get_int(0, 0, self.max_room_monsters)
         for i in range(num_monsters):
-            x = libtcod.random_get_int(0, x1, x2)
-            y = libtcod.random_get_int(0, y1, y2)
+            x = libtcod.random_get_int(0, x1 + 1, x2 - 1)
+            y = libtcod.random_get_int(0, y1 + 1, y2 - 1)
             if libtcod.random_get_int(0, 0, 100) < 80:
                 monster = mobs.Skeleton(x, y, libtcod.BKGND_NONE)
             else:
@@ -139,11 +140,18 @@ class BspMapGenerator:
             if not monster.is_blocked(x, y, self._map, self.objects):
                 self.objects.append(monster)
 
+        num_items = libtcod.random_get_int(0,0,self.max_room_items)
+        for i in range(num_items):
+            x = libtcod.random_get_int(0, x1 + 1, x2 - 1)
+            y = libtcod.random_get_int(0, y1 + 1, y2 - 1)
+            item = items.HealthPotion(x, y)
+            self.objects.append(item)
+            self.objects.send_to_back(item)
 
     def generate_map(self):
-        self._map   = self._generate_empty_map()
+        self._map = self._generate_empty_map()
         self._rooms = []
-        bsp         = libtcod.bsp_new_with_size(0, 0, self.map_width, self.map_height)
+        bsp = libtcod.bsp_new_with_size(0, 0, self.map_width, self.map_height)
         libtcod.bsp_split_recursive(bsp, 0, self.generation_depth, self.min_room_size + 1, self.min_room_size + 1, 1.5, 1.5)
         libtcod.bsp_traverse_inverted_level_order(bsp, self._traverse_node)
 
@@ -155,5 +163,3 @@ class BspMapGenerator:
         self.player.y = player_room[1]
 
         return self._map
-
-

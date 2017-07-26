@@ -5,7 +5,7 @@ from tile import Tile
 class Entity:
     #A generic object [player, monster, item, stairs, etc.]
     #It is always represented by a character on screen.
-    def __init__(self, x, y, name, char, color, background, blocks = False, fighter = None, ai = None):
+    def __init__(self, x, y, name, char, color, background, blocks = False, fighter = None, ai = None, item = None):
         self.x          = x
         self.y          = y
         self.name       = name
@@ -19,6 +19,9 @@ class Entity:
         self.ai         = ai
         if self.ai:
             self.ai.owner = self
+        self.item = item
+        if self.item:
+            self.item.owner = self
 
     def move(self, delta_x, delta_y, map_tiles, objects):
         if not self.is_blocked(self.x + delta_x, self.y + delta_y, map_tiles, objects):

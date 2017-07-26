@@ -1,5 +1,4 @@
 import libtcodpy as libtcod
-import random
 from entity import Entity
 from fighter import Fighter
 import death

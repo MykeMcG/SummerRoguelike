@@ -19,3 +19,6 @@ class EntityList:
 
     def append(self, entity):
         self._objects.append(entity)
+
+    def remove(self, entity):
+        self._objects.remove(entity)
