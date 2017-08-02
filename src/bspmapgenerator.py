@@ -6,7 +6,7 @@ import items
 from entityList import EntityList
 
 class BspMapGenerator:
-    def __init__(self, map_width, map_height, min_room_size, generation_depth, full_rooms, max_room_monsters, max_room_items, player):
+    def __init__(self, map_width, map_height, min_room_size, generation_depth, full_rooms, max_room_monsters, max_room_items, player, message_panel):
         self.map_width = map_width
         self.map_height = map_height
         self.min_room_size = min_room_size
@@ -17,6 +17,7 @@ class BspMapGenerator:
         self.player = player
         self.objects = EntityList()
         self._map = []
+        self.message_panel = message_panel
 
     def _vline(self, x, y1, y2):
         if y1 > y2:
@@ -57,7 +58,7 @@ class BspMapGenerator:
             x += 1
 
     def _traverse_node(self, node, dat):
-        #Create room
+        # Create room
         if libtcod.bsp_is_leaf(node):
             minx = node.x + 1
             maxx = node.x + node.w - 1
@@ -79,14 +80,14 @@ class BspMapGenerator:
             node.w = maxx - minx + 1
             node.h = maxy - miny + 1
 
-            #Dig room
+            # Dig room
             for x in range(minx, maxx + 1):
                 for y in range(miny, maxy + 1):
                     self._map[x][y].blocked     = False
                     self._map[x][y].block_sight = False
             self._rooms.append(((minx + maxx) // 2, (miny + maxy) // 2))
             self._place_objects(minx, miny, maxx, maxy)
-        #Create corridor
+        # Create corridor
         else:
             left   = libtcod.bsp_left(node)
             right  = libtcod.bsp_right(node)
@@ -144,7 +145,7 @@ class BspMapGenerator:
         for i in range(num_items):
             x = libtcod.random_get_int(0, x1 + 1, x2 - 1)
             y = libtcod.random_get_int(0, y1 + 1, y2 - 1)
-            item = items.HealthPotion(x, y)
+            item = items.HealthPotion(x, y, self.player, self.message_panel)
             self.objects.append(item)
             self.objects.send_to_back(item)
 

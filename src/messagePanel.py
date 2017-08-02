@@ -1,6 +1,9 @@
 import textwrap
 import libtcodpy as libtcod
 
+# TODO: Change this class to just print a buffer every frame instead.
+# TODO: Add MessageBuffer class
+
 class MessagePanel:
 
     def __init__(self, width, height):

@@ -27,3 +27,8 @@ class Fighter:
         else:
             message = '{} attacks {}, but fails to deal any damage.'
             print(message.format( self.owner.name.capitalize(), target.name))
+
+    def heal(self, amount):
+        self.hp += amount
+        if self.hp > self.max_hp:
+            self.hp = self.max_hp

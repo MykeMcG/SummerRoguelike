@@ -39,6 +39,7 @@ PANEL_Y = SCREEN_HEIGHT - PANEL_HEIGHT
 MSG_X = BAR_WIDTH + 2
 MSG_WIDTH = (SCREEN_WIDTH - BAR_WIDTH - 2) - 1
 MSG_HEIGHT = PANEL_HEIGHT - 1
+INVENTORY_WIDTH = 50
 
 # Game Variables
 PlayerX = None
@@ -50,7 +51,7 @@ GameState = 'playing'
 PlayerAction = None
 
 
-def handle_keys(key, player, objects, message_panel):
+def handle_keys(console, key, player, objects, message_panel):
     if key.vk == libtcod.KEY_ENTER and key.lalt:
         # Alt+Enter: toggle full-screen
         libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen())
@@ -82,6 +83,10 @@ def handle_keys(key, player, objects, message_panel):
                         msg = obj.item.pick_up(objects, player.inventory)
                         message_panel.append(msg, libtcod.desaturated_blue)
                         break
+            elif key_char == 'i':
+                chosen_item = show_inventory_menu(console, 'Press the key next to an item to use it. Press any other key to cancel\n', player.inventory)
+                if chosen_item is not None:
+                    chosen_item.use(player.inventory, message_panel, player)
             return 'didnt-take-turn'
 
 
@@ -210,6 +215,51 @@ def render_bar(panel, x, y, total_width, name, value, maximum, bar_color, back_c
     libtcod.console_print_ex(panel, bar_center, y, libtcod.BKGND_NONE, libtcod.CENTER, label)
 
 
+def menu(console, header, options, width):
+    if len(options) > 26:
+        # TODO: Add pagination
+        raise ValueError('Cannot have a menu with more than 26 options.')
+
+    # Calculate total height for the header and one line per option
+    header_height = libtcod.console_get_height_rect(console, 0, 0, width, SCREEN_HEIGHT, header)
+    height = len(options) + header_height
+
+    window = libtcod.console_new(width, height)
+    libtcod.console_set_default_foreground(window, libtcod.white)
+    libtcod.console_print_rect_ex(window, 0, 0, width, height, libtcod.BKGND_NONE, libtcod.LEFT, header)
+    y = header_height
+    letter_index = ord('a')
+    for opt_txt in options:
+        text = '(' + chr(letter_index) + ') ' + opt_txt
+        libtcod.console_print_ex(window, 0, y, libtcod.BKGND_NONE, libtcod.LEFT, text)
+        y += 1
+        letter_index += 1
+
+    # Blit the contents of "window" to the root console
+    x = SCREEN_WIDTH//2 - width//2
+    y = SCREEN_HEIGHT//2 - height//2
+    libtcod.console_blit(window, 0, 0, width, height, 0, x, y, 1.0, 0.7)
+    libtcod.console_flush()
+    # TODO: Do something with the user input
+    key = libtcod.console_wait_for_keypress(True)
+    index = key.c - ord('a')
+    if index >= 0 and index < len(options):
+        return index
+    return None
+
+
+def show_inventory_menu(console, header, inventory):
+    if len(inventory) == 0:
+        options = ['Inventory is empty.']
+    else:
+        options = [item.name for item in inventory]
+    index = menu(console, header, options, INVENTORY_WIDTH)
+    if index is None or len(inventory) == 0 :
+        return None
+    return inventory[index].item
+
+
+
 def main():
     global MapTiles, FovRecompute, PlayerAction
     libtcod.sys_set_fps(FPS_LIMIT)
@@ -219,11 +269,11 @@ def main():
 
     stat_panel = libtcod.console_new(SCREEN_WIDTH, PANEL_HEIGHT)
     message_panel = MessagePanel(MSG_WIDTH, MSG_HEIGHT)
-    message_panel.append("Welcome, mortal, to the Tomb of Exlueb! Here is a bunch of filler text")
+    message_panel.append('Welcome, mortal, to the Tomb of Exlueb!')
     objects = EntityList()
     player = Player(PlayerX, PlayerY)
     objects.append(player)
-    map_gen = BspMapGenerator(MAP_WIDTH, MAP_HEIGHT, ROOM_MIN_SIZE, BSP_RECURSION_DEPTH, BSP_FULL_ROOMS, MAX_ROOM_MONSTERS, MAX_ROOM_ITEMS, player)
+    map_gen = BspMapGenerator(MAP_WIDTH, MAP_HEIGHT, ROOM_MIN_SIZE, BSP_RECURSION_DEPTH, BSP_FULL_ROOMS, MAX_ROOM_MONSTERS, MAX_ROOM_ITEMS, player, message_panel)
     MapTiles = map_gen.generate_map()
     for obj in map_gen.objects:
         objects.append(obj)
@@ -242,7 +292,7 @@ def main():
         for obj in objects:
             obj.clear(con)
         libtcod.console_set_default_foreground(con, libtcod.white)
-        PlayerAction = handle_keys(key, player, objects, message_panel)
+        PlayerAction = handle_keys(con, key, player, objects, message_panel)
         if PlayerAction == 'exit':
             break
         if GameState == 'playing' and PlayerAction != 'didnt-take-turn':
