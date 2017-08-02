@@ -20,7 +20,8 @@ class Item:
         if self.use_function is None:
             output = 'The {} cannot be used.'
         else:
-            if self.use_function(player=player, message_panel=message_panel) != 'cancelled':
+            if self.use_function(player=player,
+                                 message_panel=message_panel) != 'cancelled':
                 inventory.remove(self.owner)
                 output = 'Used the {}.'
             else:
@@ -30,5 +31,26 @@ class Item:
 
 class HealthPotion(Entity):
     def __init__(self, x, y):
-        itemComponent = Item(use_function=actions.player_cast_heal)
-        super(HealthPotion, self).__init__(x, y, "health potion", 173, libtcod.red, libtcod.BKGND_NONE, item=itemComponent)
+        item_component = Item(use_function=actions.player_cast_heal)
+        super(HealthPotion, self).__init__(
+            x,
+            y,
+            "health potion",
+            173,
+            libtcod.red,
+            libtcod.BKGND_NONE,
+            item=item_component,
+        )
+
+
+class ScrollLightning(Entity):
+    def __init__(self, x, y):
+        item_component = Item(use_function=actions.cast_lightning)
+        super(ScrollLightning, self).__init__(
+            x,
+            y,
+            "scroll of lightning bolt",
+            '#',
+            libtcod.light_yellow,
+            item=item_component,
+        )

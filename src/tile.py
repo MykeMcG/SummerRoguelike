@@ -1,5 +1,5 @@
 class Tile:
-    #A map tile
+    # A map tile
     def __init__(self, blocked, block_sight = None):
         self.blocked = blocked
         if block_sight is None:

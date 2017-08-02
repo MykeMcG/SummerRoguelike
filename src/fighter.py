@@ -1,5 +1,6 @@
 import libtcodpy as libtcod
 
+
 class Fighter:
     # Combat-related properties and methods (monster, player, NPC, etc.)
     def __init__(self, hp, defense, power, death_function=None):
@@ -9,24 +10,27 @@ class Fighter:
         self.power = power
         self.death_function = death_function
 
-    def take_damage(self, damage, objectList, messagePanel):
+    def take_damage(self, damage, object_list, message_panel):
         # apply damage if possible
         if damage > 0:
             self.hp -= damage
         if self.hp <= 0:
-            function = self.death_function
-            if function != None:
-                function(self.owner, objectList, messagePanel)
+            func = self.death_function
+            if func is None:
+                func(self.owner, object_list, message_panel)
 
-    def attack(self, target, objectList, messagePanel):
+    def attack(self, target, object_list, message_panel):
         damage = self.power - target.fighter.defense
+        name = self.owner.name.capitalize()
         if damage > 0:
             message = '{} attacks {} for {} damage!'
-            messagePanel.append(message.format(self.owner.name.capitalize(), target.name, damage.__str__()), libtcod.red)
-            target.fighter.take_damage(damage, objectList, messagePanel)
+            message = message.format(name, target.name, damage.__str__())
+            message_panel.append(message, libtcod.red)
+            target.fighter.take_damage(damage, object_list, message_panel)
         else:
             message = '{} attacks {}, but fails to deal any damage.'
-            print(message.format( self.owner.name.capitalize(), target.name))
+            message = message.format(name)
+            message_panel.append(message)
 
     def heal(self, amount):
         self.hp += amount

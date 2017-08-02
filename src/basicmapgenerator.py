@@ -29,7 +29,8 @@ class BasicMapGenerator:
             out_map[x][y].blocked = False
             out_map[x][y].block_sight = False
 
-    def generate_map(self, width, height, room_min_size, room_max_size, max_rooms, player):
+    def generate_map(self, width, height, room_min_size, room_max_size,
+                     max_rooms, player):
         new_map = self._generate_empty_map(width, height)
         rooms = []
         num_rooms = 0
@@ -52,9 +53,10 @@ class BasicMapGenerator:
                     player.x = new_x
                     player.y = new_y
                 else:
-                    #Dig the tunnels
+                    # Dig the tunnels
                     (prev_x, prev_y) = rooms[num_rooms - 1].center()
-                    #Flip a coin to see if we go horizontally then vertically, or vice-versa
+                    # Flip a coin to see if we go horizontally then vertically,
+                    # or vice-versa
                     if libtcod.random_get_int(0, 0, 1) == 1:
                         self._create_h_tunnel(prev_x, new_x, prev_y, new_map)
                         self._create_v_tunnel(new_x, prev_y, new_y, new_map)

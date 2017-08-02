@@ -25,6 +25,7 @@ class MessagePanel:
         y = 1
         for (line, color) in self.lines:
             libtcod.console_set_default_foreground(con, color)
-            libtcod.console_print_ex(con, 0, y, libtcod.BKGND_NONE, libtcod.LEFT, line)
+            libtcod.console_print_ex(con, 0, y, libtcod.BKGND_NONE,
+                                     libtcod.LEFT, line)
             y += 1
         return con
