@@ -197,7 +197,9 @@ def render_bar(panel, x, y, total_width, name, value, maximum, bar_color,
 
     # Render centered text containing the actual value
     libtcod.console_set_default_foreground(panel, fore_color)
-    label = '{}: {}/{}'.format(name, value.__str__(), maximum.__str__())
+    label = consts.BAR_TEXT_TEMPLATE.format(name=name,
+                                            value=value.__str__(),
+                                            max=maximum.__str__())
     bar_center = x + total_width // 2
     libtcod.console_print_ex(panel, bar_center, y, libtcod.BKGND_NONE,
                              libtcod.CENTER, label)
@@ -232,7 +234,6 @@ def menu(console, header, options, width):
     y = consts.SCREEN_HEIGHT//2 - height//2
     libtcod.console_blit(window, 0, 0, width, height, 0, x, y, 1.0, 0.7)
     libtcod.console_flush()
-    # TODO: Do something with the user input
     key = libtcod.console_wait_for_keypress(True)
     index = key.c - ord('a')
     if index >= 0 and index < len(options):

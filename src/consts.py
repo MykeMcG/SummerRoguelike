@@ -39,6 +39,7 @@ COLOR_MESSAGE_NEUTRAL = libtcod.white
 
 # UI Options
 BAR_WIDTH = 20
+BAR_TEXT_TEMPLATE = '{name}: {value}/{max}'
 PANEL_HEIGHT = 7
 PANEL_Y = SCREEN_HEIGHT - PANEL_HEIGHT
 MSG_X = BAR_WIDTH + 2
@@ -82,8 +83,8 @@ MESSAGE_ITEM_USE_SUCCESS = 'Used the {}.'
 MESSAGE_HEAL_FAIL = 'You are already at full health!'
 MESSAGE_HEAL_SUCCESS = 'Your wounds start to feel better!'
 MESSAGE_LIGHTNING_FAIL = 'Failed to cast lightning: No target in range.'
-MESSAGE_LIGHTNING_SUCCESS = 'A lightning bolt strikes the {} with '\
-    + 'a loud thunder! The {} loses {} HP!'
+MESSAGE_LIGHTNING_SUCCESS = 'A lightning bolt strikes the {0} with '\
+    + 'a loud thunder! The {0} loses {1} HP!'
 MESSAGE_CONFUSE_FAIL = 'Failed to cast confuse: No target in range.'
 MESSAGE_CONFUSE_SUCCESS = 'The eyes of the {} look vacant, '\
     + 'as it starts to stumble around!'

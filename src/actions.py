@@ -24,7 +24,7 @@ def cast_lightning(caster, entities, message_panel, **kwargs):
         return 'cancelled'
     # TODO: Revise this line
     message = consts.MESSAGE_LIGHTNING_SUCCESS
-    message = message.format(target.name, target.name, damage.__str__())
+    message = message.format(target.name, damage.__str__())
     message_panel.append(message, consts.COLOR_MESSAGE_DANGER)
     target.fighter.take_damage(damage, entities, message_panel)
 
