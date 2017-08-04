@@ -1,4 +1,5 @@
 import libtcodpy as libtcod
+import consts
 
 
 class Fighter:
@@ -16,7 +17,7 @@ class Fighter:
             self.hp -= damage
         if self.hp <= 0:
             func = self.death_function
-            if func is None:
+            if func is not None:
                 func(self.owner, object_list, message_panel)
 
     def attack(self, target, object_list, message_panel):
@@ -25,12 +26,12 @@ class Fighter:
         if damage > 0:
             message = '{} attacks {} for {} damage!'
             message = message.format(name, target.name, damage.__str__())
-            message_panel.append(message, libtcod.red)
+            message_panel.append(message, consts.COLOR_MESSAGE_DANGER)
             target.fighter.take_damage(damage, object_list, message_panel)
         else:
             message = '{} attacks {}, but fails to deal any damage.'
-            message = message.format(name)
-            message_panel.append(message)
+            message = message.format(name, target.name.capitalize())
+            message_panel.append(message, consts.COLOR_MESSAGE_WARNING)
 
     def heal(self, amount):
         self.hp += amount

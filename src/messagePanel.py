@@ -1,5 +1,6 @@
 import textwrap
 import libtcodpy as libtcod
+import consts
 
 # TODO: Change this class to just print a buffer every frame instead.
 # TODO: Add MessageBuffer class
@@ -11,7 +12,7 @@ class MessagePanel:
         self.height = height
         self.lines = []
 
-    def append(self, text, color=libtcod.white):
+    def append(self, text, color=consts.COLOR_MESSAGE_NEUTRAL):
         new_msg_lines = textwrap.wrap(text, self.width)
 
         for line in new_msg_lines:

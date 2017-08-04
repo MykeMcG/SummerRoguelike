@@ -16,12 +16,15 @@ class Item:
             output = 'You picked up a {}.'
         return output.format(self.owner.name)
 
-    def use(self, inventory, message_panel, player=None):
+    def use(self, inventory, message_panel, player=None, caster=None,
+            entities=None, range=None, damage=None,):
         if self.use_function is None:
             output = 'The {} cannot be used.'
         else:
             if self.use_function(player=player,
-                                 message_panel=message_panel) != 'cancelled':
+                                 message_panel=message_panel,
+                                 caster=caster, entities = entities,
+                                 range=range, damage=damage) != 'cancelled':
                 inventory.remove(self.owner)
                 output = 'Used the {}.'
             else:
@@ -32,25 +35,15 @@ class Item:
 class HealthPotion(Entity):
     def __init__(self, x, y):
         item_component = Item(use_function=actions.player_cast_heal)
-        super(HealthPotion, self).__init__(
-            x,
-            y,
-            "health potion",
-            173,
-            libtcod.red,
-            libtcod.BKGND_NONE,
-            item=item_component,
-        )
+        super(HealthPotion, self).__init__(x, y, "health potion", 173,
+                                           libtcod.red, libtcod.BKGND_NONE,
+                                           item=item_component,)
 
 
 class ScrollLightning(Entity):
     def __init__(self, x, y):
         item_component = Item(use_function=actions.cast_lightning)
-        super(ScrollLightning, self).__init__(
-            x,
-            y,
-            "scroll of lightning bolt",
-            '#',
-            libtcod.light_yellow,
-            item=item_component,
-        )
+        super(ScrollLightning, self).__init__(x, y, "scroll of lightning bolt",
+                                              '#', libtcod.light_yellow,
+                                              libtcod.BKGND_NONE,
+                                              item=item_component,)

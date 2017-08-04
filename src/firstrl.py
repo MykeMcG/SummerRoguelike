@@ -1,52 +1,16 @@
 import libtcodpy as libtcod
+import items
+import consts
 from player import Player
 from entityList import EntityList
 from bspmapgenerator import BspMapGenerator
 from messagePanel import MessagePanel
 
-# Constants
-SCREEN_WIDTH = 80
-SCREEN_HEIGHT = 50
-MAP_WIDTH = 80
-MAP_HEIGHT = 43
-ROOM_MIN_SIZE = 6
-MAX_ROOMS = 50
-MAX_ROOM_MONSTERS = 2
-MAX_ROOM_ITEMS = 1
-FOV_ALGORITHM = 1
-FOV_LIGHT_WALLS = True
-TORCH_RADIUS = 10
-FPS_LIMIT = 15
-
-# Debug Flags
-DEBUG = True
 DebugShowWholeMap = False
-
-# Colors
-COLOR_DARK_WALL = libtcod.Color(50, 50, 150)
-COLOR_DARK_GROUND = libtcod.Color(0, 0, 100)
-COLOR_LIGHT_WALL = libtcod.Color(204, 204, 204)
-COLOR_LIGHT_GROUND = libtcod.Color(33, 33, 33)
-
-# Map Options
-BSP_RECURSION_DEPTH = 30
-BSP_FULL_ROOMS = False
-
-# UI Options
-BAR_WIDTH = 20
-PANEL_HEIGHT = 7
-PANEL_Y = SCREEN_HEIGHT - PANEL_HEIGHT
-MSG_X = BAR_WIDTH + 2
-MSG_WIDTH = (SCREEN_WIDTH - BAR_WIDTH - 2) - 1
-MSG_HEIGHT = PANEL_HEIGHT - 1
-INVENTORY_WIDTH = 50
-INVENTORY_MESSAGE = 'Press the key next to an item to use it. ' \
-                  + 'Press any other key to cancel\n'
 
 # Game Variables
 PlayerX = None
 PlayerY = None
-
 MapTiles = None
 FovRecompute = True
 GameState = 'playing'
@@ -59,7 +23,7 @@ def handle_keys(console, key, player, objects, message_panel):
         libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen())
     elif key.vk == libtcod.KEY_ESCAPE:
         return 'exit'  # exit game
-    elif key.vk == libtcod.KEY_F1 and DEBUG:
+    elif key.vk == libtcod.KEY_F1 and consts.DEBUG:
         global DebugShowWholeMap
         DebugShowWholeMap = not DebugShowWholeMap  # Toggle DebugShowWholeMap
     if GameState == 'playing':
@@ -83,13 +47,17 @@ def handle_keys(console, key, player, objects, message_panel):
                 for obj in objects:
                     if obj.x == player.x and obj.y == player.y and obj.item:
                         msg = obj.item.pick_up(objects, player.inventory)
-                        message_panel.append(msg, libtcod.desaturated_blue)
+                        message_panel.append(msg, consts.COLOR_MESSAGE_GOOD)
                         break
             elif key_char == 'i':
-                chosen_item = show_inventory_menu(console, INVENTORY_MESSAGE,
+                chosen_item = show_inventory_menu(console,
+                                                  consts.INVENTORY_MESSAGE,
                                                   player.inventory)
                 if chosen_item is not None:
-                    chosen_item.use(player.inventory, message_panel, player)
+                    chosen_item.use(player.inventory,
+                                    message_panel=message_panel,
+                                    player=player, caster=player,
+                                    entities=objects)
             return 'didnt-take-turn'
 
 
@@ -107,7 +75,7 @@ def get_names_under_mouse(mouse, fov_map, objects):
 def render_wall(con, x, y, color):
     # TODO: Think of a better way to do this
     # TODO: Improve outside walls
-    if y + 1 >= MAP_HEIGHT:
+    if y + 1 >= consts.MAP_HEIGHT:
         north = False
     else:
         north = MapTiles[x][y + 1].blocked
@@ -115,7 +83,7 @@ def render_wall(con, x, y, color):
         south = False
     else:
         south = MapTiles[x][y - 1].blocked
-    if x + 1 >= MAP_WIDTH:
+    if x + 1 >= consts.MAP_WIDTH:
         west = False
     else:
         west = MapTiles[x + 1][y].blocked
@@ -153,8 +121,8 @@ def render_wall(con, x, y, color):
 
 def render_all(con, stats_panel, message_panel, mouse, fov_map, player, 
                objects):
-    for y in range(MAP_HEIGHT):
-        for x in range(MAP_WIDTH):
+    for y in range(consts.MAP_HEIGHT):
+        for x in range(consts.MAP_WIDTH):
             if DebugShowWholeMap:
                 visible = True
             else:
@@ -163,29 +131,29 @@ def render_all(con, stats_panel, message_panel, mouse, fov_map, player,
             if not visible:
                 if MapTiles[x][y].explored or DebugShowWholeMap:
                     if wall:
-                        render_wall(con, x, y, COLOR_DARK_WALL)
+                        render_wall(con, x, y, consts.COLOR_DARK_WALL)
                     else:
                         libtcod.console_set_char_background(con, x, y,
-                                                            COLOR_DARK_GROUND, 
+                                                            consts.COLOR_DARK_GROUND,
                                                             libtcod.BKGND_SET)
             else:
                 if wall:
-                    render_wall(con, x, y, COLOR_LIGHT_WALL)
+                    render_wall(con, x, y, consts.COLOR_LIGHT_WALL)
                 else:
                     libtcod.console_set_char_background(con, x, y, 
-                                                        COLOR_LIGHT_GROUND, 
+                                                        consts.COLOR_LIGHT_GROUND,
                                                         libtcod.BKGND_SET)
                 MapTiles[x][y].explored = True
     for obj in objects:
         obj.draw(con, fov_map, DebugShowWholeMap)
-    libtcod.console_blit(con, 0, 0, MAP_WIDTH, MAP_HEIGHT, 0, 0, 0)
+    libtcod.console_blit(con, 0, 0, consts.MAP_WIDTH, consts.MAP_HEIGHT, 0, 0, 0)
 
     # Prepare to render the GUI stats_panel
     libtcod.console_set_default_background(stats_panel, libtcod.black)
     libtcod.console_clear(stats_panel)
 
     # Render the player stats
-    render_bar(stats_panel, 1, 1, BAR_WIDTH, 'HP', player.fighter.hp, 
+    render_bar(stats_panel, 1, 1, consts.BAR_WIDTH, 'HP', player.fighter.hp,
                player.fighter.max_hp, libtcod.red, libtcod.darker_red)
 
     # Render a list of what's under the mouse cursor
@@ -194,12 +162,12 @@ def render_all(con, stats_panel, message_panel, mouse, fov_map, player,
                              libtcod.LEFT, 
                              get_names_under_mouse(mouse, fov_map, objects))
 
-    libtcod.console_blit(stats_panel, 0, 0, SCREEN_WIDTH, PANEL_HEIGHT, 0, 0, 
-                         PANEL_Y)
+    libtcod.console_blit(stats_panel, 0, 0, consts.SCREEN_WIDTH,
+                         consts.PANEL_HEIGHT, 0, 0, consts.PANEL_Y)
 
     # Render the message log
     libtcod.console_blit(message_panel.render(), 0, 0, message_panel.width,
-                         message_panel.height, 0, MSG_X, PANEL_Y)
+                         message_panel.height, 0, consts.MSG_X, consts.PANEL_Y)
 
 
 def generate_fov_map(width, height):
@@ -242,7 +210,7 @@ def menu(console, header, options, width):
 
     # Calculate total height for the header and one line per option
     header_height = libtcod.console_get_height_rect(console, 0, 0,
-                                                    width, SCREEN_HEIGHT,
+                                                    width, consts.SCREEN_HEIGHT,
                                                     header)
     height = len(options) + header_height
 
@@ -260,8 +228,8 @@ def menu(console, header, options, width):
         letter_index += 1
 
     # Blit the contents of "window" to the root console
-    x = SCREEN_WIDTH//2 - width//2
-    y = SCREEN_HEIGHT//2 - height//2
+    x = consts.SCREEN_WIDTH//2 - width//2
+    y = consts.SCREEN_HEIGHT//2 - height//2
     libtcod.console_blit(window, 0, 0, width, height, 0, x, y, 1.0, 0.7)
     libtcod.console_flush()
     # TODO: Do something with the user input
@@ -277,7 +245,7 @@ def show_inventory_menu(console, header, inventory):
         options = ['Inventory is empty.']
     else:
         options = [item.name for item in inventory]
-    index = menu(console, header, options, INVENTORY_WIDTH)
+    index = menu(console, header, options, consts.INVENTORY_WIDTH)
     if index is None or len(inventory) == 0:
         return None
     return inventory[index].item
@@ -285,27 +253,28 @@ def show_inventory_menu(console, header, inventory):
 
 def main():
     global MapTiles, FovRecompute, PlayerAction
-    libtcod.sys_set_fps(FPS_LIMIT)
-    libtcod.console_set_custom_font('tiles.png', libtcod.FONT_TYPE_GREYSCALE
+    libtcod.sys_set_fps(consts.FPS_LIMIT)
+    libtcod.console_set_custom_font(consts.TILESET, libtcod.FONT_TYPE_GREYSCALE
                                     | libtcod.FONT_LAYOUT_ASCII_INROW)
-    libtcod.console_init_root(SCREEN_WIDTH, SCREEN_HEIGHT, 'Wrath of Exuleb',
+    libtcod.console_init_root(consts.SCREEN_WIDTH, consts.SCREEN_HEIGHT,
+                              consts.GAME_TITLE,
                               False)
-    con = libtcod.console_new(SCREEN_WIDTH, SCREEN_HEIGHT)
+    con = libtcod.console_new(consts.SCREEN_WIDTH, consts.SCREEN_HEIGHT)
 
-    stat_panel = libtcod.console_new(SCREEN_WIDTH, PANEL_HEIGHT)
-    message_panel = MessagePanel(MSG_WIDTH, MSG_HEIGHT)
-    message_panel.append('Welcome, mortal, to the Tomb of Exlueb!')
+    stat_panel = libtcod.console_new(consts.SCREEN_WIDTH, consts.PANEL_HEIGHT)
+    message_panel = MessagePanel(consts.MSG_WIDTH, consts.MSG_HEIGHT)
+    message_panel.append(consts.INTRO_MESSAGE)
     objects = EntityList()
     player = Player(PlayerX, PlayerY)
     objects.append(player)
-    map_gen = BspMapGenerator(MAP_WIDTH, MAP_HEIGHT, ROOM_MIN_SIZE,
-                              BSP_RECURSION_DEPTH, BSP_FULL_ROOMS,
-                              MAX_ROOM_MONSTERS, MAX_ROOM_ITEMS, player,
-                              message_panel)
+    map_gen = BspMapGenerator(consts.MAP_WIDTH, consts.MAP_HEIGHT,
+                              consts.ROOM_MIN_SIZE, consts.BSP_RECURSION_DEPTH,
+                              consts.BSP_FULL_ROOMS, consts.MAX_ROOM_MONSTERS,
+                              consts.MAX_ROOM_ITEMS, player, message_panel)
     MapTiles = map_gen.generate_map()
     for obj in map_gen.objects:
         objects.append(obj)
-    fov_map = generate_fov_map(MAP_WIDTH, MAP_HEIGHT)
+    fov_map = generate_fov_map(consts.MAP_WIDTH, consts.MAP_HEIGHT)
 
     mouse = libtcod.Mouse()
     key = libtcod.Key()
@@ -315,8 +284,10 @@ def main():
                                     | libtcod.EVENT_MOUSE, key, mouse)
         if FovRecompute:
             FovRecompute = False
-            libtcod.map_compute_fov(fov_map, player.x, player.y, TORCH_RADIUS,
-                                    FOV_LIGHT_WALLS, FOV_ALGORITHM)
+            libtcod.map_compute_fov(fov_map, player.x, player.y,
+                                    consts.TORCH_RADIUS,
+                                    consts.FOV_LIGHT_WALLS,
+                                    consts.FOV_ALGORITHM)
         render_all(con, stat_panel, message_panel, mouse, fov_map, player,
                    objects)
         libtcod.console_flush()

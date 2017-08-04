@@ -6,7 +6,7 @@ from fighter import Fighter
 class Player(Entity):
     def __init__(self, x, y):
         fighter_component = Fighter(hp=30, defense=2, power=5)
-        super(Player, self).__init__(x, y, 'player', '@', libtcod.white,
+        super(Player, self).__init__(x, y, 'the player', '@', libtcod.white,
                                      libtcod.BKGND_NONE, True,
                                      fighter_component)
         self.inventory = EntityList()

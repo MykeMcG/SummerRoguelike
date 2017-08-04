@@ -164,7 +164,11 @@ class BspMapGenerator:
         for i in range(num_items):
             x = libtcod.random_get_int(0, x1 + 1, x2 - 1)
             y = libtcod.random_get_int(0, y1 + 1, y2 - 1)
-            item = items.HealthPotion(x, y)
+            dice = libtcod.random_get_int(0, 0, 100)
+            if dice < 70:
+                item = items.HealthPotion(x, y)
+            else:
+                item = items.ScrollLightning(x, y)
             self.objects.append(item)
             self.objects.send_to_back(item)
 
