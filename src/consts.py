@@ -9,7 +9,7 @@ TORCH_RADIUS = 10
 FPS_LIMIT = 15
 TILESET = 'tiles.png'
 GAME_TITLE = 'Wrath of Exuleb'
-INTRO_MESSAGE = 'Welcome, mortal, to the Tomb of Exlueb!'
+
 
 # Map Options
 BSP_RECURSION_DEPTH = 30
@@ -21,8 +21,10 @@ MAX_ROOMS = 50
 MAX_ROOM_MONSTERS = 2
 MAX_ROOM_ITEMS = 1
 
+
 # Debug Flags
 DEBUG = True
+
 
 # Colors
 COLOR_DARK_WALL = libtcod.Color(50, 50, 150)
@@ -34,6 +36,7 @@ COLOR_MESSAGE_WARNING = libtcod.orange
 COLOR_MESSAGE_GOOD = libtcod.dark_green
 COLOR_MESSAGE_NEUTRAL = libtcod.white
 
+
 # UI Options
 BAR_WIDTH = 20
 PANEL_HEIGHT = 7
@@ -42,9 +45,49 @@ MSG_X = BAR_WIDTH + 2
 MSG_WIDTH = (SCREEN_WIDTH - BAR_WIDTH - 2) - 1
 MSG_HEIGHT = PANEL_HEIGHT - 1
 INVENTORY_WIDTH = 50
-INVENTORY_MESSAGE = 'Press the key next to an item to use it. ' \
-                  + 'Press any other key to cancel\n'
+
 
 # Spell Options
 LIGHTNING_DAMAGE = 20
 LIGHTNING_RANGE = 5
+CONFUSE_NUM_TURNS = 10
+CONFUSE_RANGE = 8
+
+
+# Items
+ITEM_HEALTHPOTION_NAME = 'health potion'
+ITEM_HEALTHPOTION_CHAR = 173
+ITEM_SCROLLLIGHTNING_NAME = 'scroll of lightning bolt'
+ITEM_SCROLLLIGHTNING_CHAR = '#'
+ITEM_SCROLLCONFUSE_NAME = 'scroll of confusion'
+ITEM_SCROLLCONFUSE_CHAR = '#'
+ITEM_CORPSE_NAME = '{} remains'
+ITEM_CORPSE_CHAR = '%'
+
+
+# Messages
+MESSAGE_GAME_START = 'Welcome, mortal, to the Tomb of Exlueb!'
+MESSAGE_PLAYER_DEATH = 'You have fallen in battle...'
+
+MESSAGE_INVENTORY_OPEN = 'Press the key next to an item to use it.'\
+    + 'Press any other key to cancel.\n'
+MESSAGE_INVENTORY_EMPTY = 'Inventory is empty.'
+
+MESSAGE_ITEM_PICKUP_FAIL = 'Your inventory is full. Unable to pick up {}.'
+MESSAGE_ITEM_PICKUP_SUCCESS = 'You picked up a {}.'
+MESSAGE_ITEM_USE_NOUSE = 'The {} cannot be used.'
+MESSAGE_ITEM_USE_FAIL = 'Unable to use the {}.'
+MESSAGE_ITEM_USE_SUCCESS = 'Used the {}.'
+
+MESSAGE_HEAL_FAIL = 'You are already at full health!'
+MESSAGE_HEAL_SUCCESS = 'Your wounds start to feel better!'
+MESSAGE_LIGHTNING_FAIL = 'Failed to cast lightning: No target in range.'
+MESSAGE_LIGHTNING_SUCCESS = 'A lightning bolt strikes the {} with '\
+    + 'a loud thunder! The {} loses {} HP!'
+MESSAGE_CONFUSE_FAIL = 'Failed to cast confuse: No target in range.'
+MESSAGE_CONFUSE_SUCCESS = 'The eyes of the {} look vacant, '\
+    + 'as it starts to stumble around!'
+MESSAGE_CONFUSE_END = 'The {} is no longer confused!'
+
+MESSAGE_GENERIC_DEATH = '{} collapses into a mangled heap!'
+MESSAGE_SKELETON_DEATH = '{} collapses into a pile of bones!'

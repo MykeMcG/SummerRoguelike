@@ -51,7 +51,7 @@ def handle_keys(console, key, player, objects, message_panel):
                         break
             elif key_char == 'i':
                 chosen_item = show_inventory_menu(console,
-                                                  consts.INVENTORY_MESSAGE,
+                                                  consts.MESSAGE_INVENTORY_OPEN,
                                                   player.inventory)
                 if chosen_item is not None:
                     chosen_item.use(player.inventory,
@@ -242,7 +242,7 @@ def menu(console, header, options, width):
 
 def show_inventory_menu(console, header, inventory):
     if len(inventory) == 0:
-        options = ['Inventory is empty.']
+        options = [consts.MESSAGE_INVENTORY_EMPTY]
     else:
         options = [item.name for item in inventory]
     index = menu(console, header, options, consts.INVENTORY_WIDTH)
@@ -263,7 +263,7 @@ def main():
 
     stat_panel = libtcod.console_new(consts.SCREEN_WIDTH, consts.PANEL_HEIGHT)
     message_panel = MessagePanel(consts.MSG_WIDTH, consts.MSG_HEIGHT)
-    message_panel.append(consts.INTRO_MESSAGE)
+    message_panel.append(consts.MESSAGE_GAME_START)
     objects = EntityList()
     player = Player(PlayerX, PlayerY)
     objects.append(player)

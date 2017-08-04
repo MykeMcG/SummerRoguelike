@@ -167,8 +167,10 @@ class BspMapGenerator:
             dice = libtcod.random_get_int(0, 0, 100)
             if dice < 70:
                 item = items.HealthPotion(x, y)
-            else:
+            elif dice < 70 + 15:
                 item = items.ScrollLightning(x, y)
+            else:
+                item = items.ScrollConfuse(x, y)
             self.objects.append(item)
             self.objects.send_to_back(item)
 
