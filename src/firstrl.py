@@ -1,7 +1,7 @@
 import libtcodpy as libtcod
 import items
 import consts
-from player import Player
+from player import Player as PlayerClass
 from entityList import EntityList
 from bspmapgenerator import BspMapGenerator
 from messagePanel import MessagePanel
@@ -11,13 +11,21 @@ DebugShowWholeMap = False
 # Game Variables
 PlayerX = None
 PlayerY = None
-MapTiles = None
-FovRecompute = True
+Player = None
+MapGen = None
+Map_Tiles = None
+Map_Objects = None
+Fov_Map = None
+Fov_Recompute = True
 GameState = 'playing'
 PlayerAction = None
+Key = None
+Mouse = None
+Message_Panel = None
+Stats_Panel = None
+Console = None
 
-
-def handle_keys(console, key, player, objects, message_panel):
+def handle_keys(console, key, Player, objects, message_panel):
     if key.vk == libtcod.KEY_ENTER and key.lalt:
         # Alt+Enter: toggle full-screen
         libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen())
@@ -28,35 +36,35 @@ def handle_keys(console, key, player, objects, message_panel):
         DebugShowWholeMap = not DebugShowWholeMap  # Toggle DebugShowWholeMap
     if GameState == 'playing':
         # movement keys
-        global FovRecompute
+        global Fov_Recompute
         if key.vk == libtcod.KEY_UP:
-            player.move_or_attack(0, -1, MapTiles, objects, message_panel)
-            FovRecompute = True
+            Player.move_or_attack(0, -1, Map_Tiles, objects, message_panel)
+            Fov_Recompute = True
         elif key.vk == libtcod.KEY_DOWN:
-            player.move_or_attack(0, 1, MapTiles, objects, message_panel)
-            FovRecompute = True
+            Player.move_or_attack(0, 1, Map_Tiles, objects, message_panel)
+            Fov_Recompute = True
         elif key.vk == libtcod.KEY_LEFT:
-            player.move_or_attack(-1, 0, MapTiles, objects, message_panel)
-            FovRecompute = True
+            Player.move_or_attack(-1, 0, Map_Tiles, objects, message_panel)
+            Fov_Recompute = True
         elif key.vk == libtcod.KEY_RIGHT:
-            player.move_or_attack(1, 0, MapTiles, objects, message_panel)
-            FovRecompute = True
+            Player.move_or_attack(1, 0, Map_Tiles, objects, message_panel)
+            Fov_Recompute = True
         else:
             key_char = chr(key.c)
             if key_char == 'g':
                 for obj in objects:
-                    if obj.x == player.x and obj.y == player.y and obj.item:
-                        msg = obj.item.pick_up(objects, player.inventory)
+                    if obj.x == Player.x and obj.y == Player.y and obj.item:
+                        msg = obj.item.pick_up(objects, Player.inventory)
                         message_panel.append(msg, consts.COLOR_MESSAGE_GOOD)
                         break
             elif key_char == 'i':
                 chosen_item = show_inventory_menu(console,
                                                   consts.MESSAGE_INVENTORY_OPEN,
-                                                  player.inventory)
+                                                  Player.inventory)
                 if chosen_item is not None:
-                    chosen_item.use(player.inventory,
+                    chosen_item.use(Player.inventory,
                                     message_panel=message_panel,
-                                    player=player, caster=player,
+                                    Player=Player, caster=Player,
                                     entities=objects)
             return 'didnt-take-turn'
 
@@ -78,19 +86,19 @@ def render_wall(con, x, y, color):
     if y + 1 >= consts.MAP_HEIGHT:
         north = False
     else:
-        north = MapTiles[x][y + 1].blocked
+        north = Map_Tiles[x][y + 1].blocked
     if y - 1 < 0:
         south = False
     else:
-        south = MapTiles[x][y - 1].blocked
+        south = Map_Tiles[x][y - 1].blocked
     if x + 1 >= consts.MAP_WIDTH:
         west = False
     else:
-        west = MapTiles[x + 1][y].blocked
+        west = Map_Tiles[x + 1][y].blocked
     if x - 1 < 0:
         east = False
     else:
-        east = MapTiles[x - 1][y].blocked
+        east = Map_Tiles[x - 1][y].blocked
     if north and south and east and west:
         wall_char = libtcod.CHAR_DCROSS
     elif north and not south and east and west:
@@ -119,7 +127,7 @@ def render_wall(con, x, y, color):
     libtcod.console_set_char(con, x, y, wall_char)
 
 
-def render_all(con, stats_panel, message_panel, mouse, fov_map, player, 
+def render_all(con, stats_panel, message_panel, mouse, fov_map, Player, 
                objects):
     for y in range(consts.MAP_HEIGHT):
         for x in range(consts.MAP_WIDTH):
@@ -127,9 +135,9 @@ def render_all(con, stats_panel, message_panel, mouse, fov_map, player,
                 visible = True
             else:
                 visible = libtcod.map_is_in_fov(fov_map, x, y)
-            wall = MapTiles[x][y].block_sight
+            wall = Map_Tiles[x][y].block_sight
             if not visible:
-                if MapTiles[x][y].explored or DebugShowWholeMap:
+                if Map_Tiles[x][y].explored or DebugShowWholeMap:
                     if wall:
                         render_wall(con, x, y, consts.COLOR_DARK_WALL)
                     else:
@@ -143,7 +151,7 @@ def render_all(con, stats_panel, message_panel, mouse, fov_map, player,
                     libtcod.console_set_char_background(con, x, y, 
                                                         consts.COLOR_LIGHT_GROUND,
                                                         libtcod.BKGND_SET)
-                MapTiles[x][y].explored = True
+                Map_Tiles[x][y].explored = True
     for obj in objects:
         obj.draw(con, fov_map, DebugShowWholeMap)
     libtcod.console_blit(con, 0, 0, consts.MAP_WIDTH, consts.MAP_HEIGHT, 0, 0, 0)
@@ -152,9 +160,9 @@ def render_all(con, stats_panel, message_panel, mouse, fov_map, player,
     libtcod.console_set_default_background(stats_panel, libtcod.black)
     libtcod.console_clear(stats_panel)
 
-    # Render the player stats
-    render_bar(stats_panel, 1, 1, consts.BAR_WIDTH, 'HP', player.fighter.hp,
-               player.fighter.max_hp, libtcod.red, libtcod.darker_red)
+    # Render the Player stats
+    render_bar(stats_panel, 1, 1, consts.BAR_WIDTH, 'HP', Player.fighter.hp,
+               Player.fighter.max_hp, libtcod.red, libtcod.darker_red)
 
     # Render a list of what's under the mouse cursor
     libtcod.console_set_default_foreground(stats_panel, libtcod.light_gray)
@@ -175,8 +183,8 @@ def generate_fov_map(width, height):
     for y in range(height):
         for x in range(width):
             libtcod.map_set_properties(fov_map, x, y, 
-                                       not MapTiles[x][y].block_sight,
-                                       not MapTiles[x][y].blocked)
+                                       not Map_Tiles[x][y].block_sight,
+                                       not Map_Tiles[x][y].blocked)
     return fov_map
 
 
@@ -252,57 +260,97 @@ def show_inventory_menu(console, header, inventory):
     return inventory[index].item
 
 
+def target_tile(con, stats_panel, message_panel, key, mouse, fov_map, Player, 
+                objects, max_range=None):
+    while True:
+        libtcod.console_flush()
+        libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS
+                                    |libtcod.EVENT_MOUSE, key, mouse)
+        render_all(con, stats_panel, message_panel, mouse, fov_map, Player, 
+               objects)
+        (x, y) = (mouse.cx, mouse.cy)
+        if (mouse.lbutton_pressed and libtcod.map_is_in_fov(fov_map, x, y)
+            and (max_range is None or Player.distance(x, y) <= max_range)):
+            return (x, y)
+        if mouse.rbutton_pressed or key.vk == libtcod.KEY_ESCAPE:
+            return (None, None)
+
+
+def new_game():
+    global Player, MapGen, Map_Tiles, Map_Objects, Fov_Recompute, PlayerAction
+    global Message_Panel
+    Player = PlayerClass(PlayerX, PlayerY)
+    MapGen = BspMapGenerator(consts.MAP_WIDTH, consts.MAP_HEIGHT,
+                              consts.ROOM_MIN_SIZE, consts.BSP_RECURSION_DEPTH,
+                              consts.BSP_FULL_ROOMS, consts.MAX_ROOM_MONSTERS,
+                              consts.MAX_ROOM_ITEMS, Player, Message_Panel)
+    Map_Tiles = MapGen.generate_map()
+    Map_Objects = EntityList()
+    Map_Objects.append(Player)
+    for obj in MapGen.objects:
+        Map_Objects.append(obj)
+    initialize_fov()
+    # TODO: change this to a MessageBuffer or whatever
+    Message_Panel = MessagePanel(consts.MSG_WIDTH, consts.MSG_HEIGHT)
+    Message_Panel.append(consts.MESSAGE_GAME_START)
+    GameState = 'playing'
+
+
+def initialize_fov():
+    global Fov_Recompute, Fov_Map
+    Fov_Recompute = True
+    Fov_Map = libtcod.map_new(consts.MAP_WIDTH, consts.MAP_HEIGHT)
+    for y in range(consts.MAP_HEIGHT):
+        for x in range(consts.MAP_WIDTH):
+            libtcod.map_set_properties(Fov_Map, x, y,
+                                        not Map_Tiles[x][y].block_sight,
+                                        not Map_Tiles[x][y].blocked)
+
+
+def play_game():
+    global Key, Mouse, Fov_Recompute, Fov_Map, Message_Panel, Stats_Panel
+    global Map_Objects
+    PlayerAction = None
+    Mouse = libtcod.Mouse()
+    Key = libtcod.Key()
+    while not libtcod.console_is_window_closed():
+        libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS
+                                    | libtcod.EVENT_MOUSE, Key, Mouse)
+        if Fov_Recompute:
+            Fov_Recompute = False
+            libtcod.map_compute_fov(Fov_Map, Player.x, Player.y,
+                                    consts.TORCH_RADIUS,
+                                    consts.FOV_LIGHT_WALLS,
+                                    consts.FOV_ALGORITHM)
+        render_all(Console, Stats_Panel, Message_Panel, Mouse, Fov_Map, Player,
+                   Map_Objects)
+        libtcod.console_flush()
+        for obj in Map_Objects:
+            obj.clear(Console)
+        libtcod.console_set_default_foreground(Console, libtcod.white)
+        PlayerAction = handle_keys(Console, Key, Player, Map_Objects,
+                                    Message_Panel)
+        if PlayerAction == 'exit':
+            break
+        if GameState == 'playing' and PlayerAction != 'didnt-take-turn':
+            for obj in Map_Objects:
+                if obj.ai is not None:
+                    obj.ai.take_turn(Fov_Map, Map_Tiles, Map_Objects,
+                                    Message_Panel, Player)
+
 def main():
-    global MapTiles, FovRecompute, PlayerAction
+    global Console, Stats_Panel
     libtcod.sys_set_fps(consts.FPS_LIMIT)
     libtcod.console_set_custom_font(consts.TILESET, libtcod.FONT_TYPE_GREYSCALE
                                     | libtcod.FONT_LAYOUT_ASCII_INROW)
     libtcod.console_init_root(consts.SCREEN_WIDTH, consts.SCREEN_HEIGHT,
                               consts.GAME_TITLE,
                               False)
-    con = libtcod.console_new(consts.SCREEN_WIDTH, consts.SCREEN_HEIGHT)
+    Console = libtcod.console_new(consts.SCREEN_WIDTH, consts.SCREEN_HEIGHT)
 
-    stat_panel = libtcod.console_new(consts.SCREEN_WIDTH, consts.PANEL_HEIGHT)
-    message_panel = MessagePanel(consts.MSG_WIDTH, consts.MSG_HEIGHT)
-    message_panel.append(consts.MESSAGE_GAME_START)
-    objects = EntityList()
-    player = Player(PlayerX, PlayerY)
-    objects.append(player)
-    map_gen = BspMapGenerator(consts.MAP_WIDTH, consts.MAP_HEIGHT,
-                              consts.ROOM_MIN_SIZE, consts.BSP_RECURSION_DEPTH,
-                              consts.BSP_FULL_ROOMS, consts.MAX_ROOM_MONSTERS,
-                              consts.MAX_ROOM_ITEMS, player, message_panel)
-    MapTiles = map_gen.generate_map()
-    for obj in map_gen.objects:
-        objects.append(obj)
-    fov_map = generate_fov_map(consts.MAP_WIDTH, consts.MAP_HEIGHT)
-
-    mouse = libtcod.Mouse()
-    key = libtcod.Key()
-
-    while not libtcod.console_is_window_closed():
-        libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS
-                                    | libtcod.EVENT_MOUSE, key, mouse)
-        if FovRecompute:
-            FovRecompute = False
-            libtcod.map_compute_fov(fov_map, player.x, player.y,
-                                    consts.TORCH_RADIUS,
-                                    consts.FOV_LIGHT_WALLS,
-                                    consts.FOV_ALGORITHM)
-        render_all(con, stat_panel, message_panel, mouse, fov_map, player,
-                   objects)
-        libtcod.console_flush()
-        for obj in objects:
-            obj.clear(con)
-        libtcod.console_set_default_foreground(con, libtcod.white)
-        PlayerAction = handle_keys(con, key, player, objects, message_panel)
-        if PlayerAction == 'exit':
-            break
-        if GameState == 'playing' and PlayerAction != 'didnt-take-turn':
-            for obj in objects:
-                if obj.ai is not None:
-                    obj.ai.take_turn(fov_map, MapTiles, objects, message_panel,
-                                     player)
+    Stats_Panel = libtcod.console_new(consts.SCREEN_WIDTH, consts.PANEL_HEIGHT)
+    new_game()
+    play_game()
 
 
 if __name__ == '__main__':

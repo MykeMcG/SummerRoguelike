@@ -54,6 +54,9 @@ class Entity:
         dy = other.y - self.y
         return math.sqrt(dx ** 2 + dy ** 2)
 
+    def distance(self, x, y):
+        return math.sqrt((x - self.x) ** 2 + (y - self.y) ** 2)
+
     def draw(self, console, fov_map, show_whole_map):
         if libtcod.map_is_in_fov(fov_map, self.x, self.y) or show_whole_map:
             # set the color and draw the character representing the object
