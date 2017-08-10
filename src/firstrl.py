@@ -1,4 +1,5 @@
 import libtcodpy as libtcod
+import shelve
 import items
 import consts
 from player import Player as PlayerClass
@@ -9,16 +10,16 @@ from messagePanel import MessagePanel
 DebugShowWholeMap = False
 
 # Game Variables
-PlayerX = None
-PlayerY = None
+Player_X = None
+Player_Y = None
 Player = None
-MapGen = None
+Map_Gen = None
 Map_Tiles = None
 Map_Objects = None
 Fov_Map = None
 Fov_Recompute = True
-GameState = 'playing'
-PlayerAction = None
+Game_State = 'playing'
+Player_Action = None
 Key = None
 Mouse = None
 Message_Panel = None
@@ -34,7 +35,7 @@ def handle_keys(console, key, Player, objects, message_panel):
     elif key.vk == libtcod.KEY_F1 and consts.DEBUG:
         global DebugShowWholeMap
         DebugShowWholeMap = not DebugShowWholeMap  # Toggle DebugShowWholeMap
-    if GameState == 'playing':
+    if Game_State == 'playing':
         # movement keys
         global Fov_Recompute
         if key.vk == libtcod.KEY_UP:
@@ -219,9 +220,13 @@ def menu(console, header, options, width):
         raise ValueError('Cannot have a menu with more than 26 options.')
 
     # Calculate total height for the header and one line per option
-    header_height = libtcod.console_get_height_rect(console, 0, 0,
-                                                    width, consts.SCREEN_HEIGHT,
-                                                    header)
+    if header == '':
+        header_height = 0
+    else:
+        header_height = libtcod.console_get_height_rect(console, 0, 0,
+                                                        width, 
+                                                        consts.SCREEN_HEIGHT,
+                                                        header)
     height = len(options) + header_height
 
     window = libtcod.console_new(width, height)
@@ -277,27 +282,28 @@ def target_tile(con, stats_panel, message_panel, key, mouse, fov_map, Player,
 
 
 def new_game():
-    global Player, MapGen, Map_Tiles, Map_Objects, Fov_Recompute, PlayerAction
+    global Player, Map_Gen, Map_Tiles, Map_Objects, Fov_Recompute, Player_Action
     global Message_Panel
-    Player = PlayerClass(PlayerX, PlayerY)
-    MapGen = BspMapGenerator(consts.MAP_WIDTH, consts.MAP_HEIGHT,
+    Player = PlayerClass(Player_X, Player_Y)
+    Map_Gen = BspMapGenerator(consts.MAP_WIDTH, consts.MAP_HEIGHT,
                               consts.ROOM_MIN_SIZE, consts.BSP_RECURSION_DEPTH,
                               consts.BSP_FULL_ROOMS, consts.MAX_ROOM_MONSTERS,
                               consts.MAX_ROOM_ITEMS, Player, Message_Panel)
-    Map_Tiles = MapGen.generate_map()
+    Map_Tiles = Map_Gen.generate_map()
     Map_Objects = EntityList()
     Map_Objects.append(Player)
-    for obj in MapGen.objects:
+    for obj in Map_Gen.objects:
         Map_Objects.append(obj)
     initialize_fov()
     # TODO: change this to a MessageBuffer or whatever
     Message_Panel = MessagePanel(consts.MSG_WIDTH, consts.MSG_HEIGHT)
     Message_Panel.append(consts.MESSAGE_GAME_START)
-    GameState = 'playing'
+    Game_State = 'playing'
 
 
 def initialize_fov():
-    global Fov_Recompute, Fov_Map
+    global Fov_Recompute, Fov_Map, Console
+    libtcod.console_clear(Console)
     Fov_Recompute = True
     Fov_Map = libtcod.map_new(consts.MAP_WIDTH, consts.MAP_HEIGHT)
     for y in range(consts.MAP_HEIGHT):
@@ -310,7 +316,7 @@ def initialize_fov():
 def play_game():
     global Key, Mouse, Fov_Recompute, Fov_Map, Message_Panel, Stats_Panel
     global Map_Objects
-    PlayerAction = None
+    Player_Action = None
     Mouse = libtcod.Mouse()
     Key = libtcod.Key()
     while not libtcod.console_is_window_closed():
@@ -328,15 +334,81 @@ def play_game():
         for obj in Map_Objects:
             obj.clear(Console)
         libtcod.console_set_default_foreground(Console, libtcod.white)
-        PlayerAction = handle_keys(Console, Key, Player, Map_Objects,
+        Player_Action = handle_keys(Console, Key, Player, Map_Objects,
                                     Message_Panel)
-        if PlayerAction == 'exit':
+        if Player_Action == 'exit':
+            save_game()
             break
-        if GameState == 'playing' and PlayerAction != 'didnt-take-turn':
+        if Game_State == 'playing' and Player_Action != 'didnt-take-turn':
             for obj in Map_Objects:
                 if obj.ai is not None:
                     obj.ai.take_turn(Fov_Map, Map_Tiles, Map_Objects,
                                     Message_Panel, Player)
+
+
+def main_menu():
+    global Console
+    img = libtcod.image_load(consts.TITLE_IMAGE)
+    while not libtcod.console_is_window_closed():
+        # Show the background image at 2x resolution
+        libtcod.image_blit_2x(img, 0, 0, 0,)
+
+        # Show the title etc.
+        libtcod.console_set_default_foreground(0, libtcod.light_yellow)
+        libtcod.console_print_ex(0, consts.SCREEN_WIDTH//2,
+                                consts.SCREEN_HEIGHT//2-4, libtcod.BKGND_NONE,
+                                libtcod.CENTER, consts.GAME_TITLE)
+        libtcod.console_print_ex(0, consts.SCREEN_WIDTH//2,
+                                consts.SCREEN_HEIGHT-2, libtcod.BKGND_NONE,
+                                libtcod.CENTER, consts.TITLE_CREDITS)
+
+        options = ['Play a new game', 'Continue saved game', 'Quit']
+        choice = menu(Console, '', options, 24)
+        if choice == 0: # New Game
+            new_game()
+            play_game()
+        elif choice == 1: # Load
+            try:
+                load_game()
+            except:
+                msgbox(consts.MESSAGE_NO_SAVE, width=24)
+                continue
+            play_game()
+        elif choice == 2: # Quit
+            break
+
+
+def save_game():
+    global Map_Tiles, Map_Objects, Player, Message_Panel, Game_State
+    # Open a new empty shelf [possibly overwriting an old one]
+    # TODO: Deal with creating new folders as necessary
+    file = shelve.open(consts.SAVE_LOCATION, 'n')
+    file[consts.SAVE_HEADER_MAP] = Map_Tiles
+    file[consts.SAVE_HEADER_OBJECTS] = Map_Objects
+    file[consts.SAVE_HEADER_PLAYERINDEX] = Map_Objects.index(Player)
+    file[consts.SAVE_HEADER_INVENTORY] = Player.inventory
+    file[consts.SAVE_HEADER_MESSAGELOG] = Message_Panel.lines
+    file[consts.SAVE_HEADER_STATE] = Game_State
+    file.close()
+
+
+def load_game():
+    global Map_Tiles, Map_Objects, Player, Message_Panel, Game_State
+    file = shelve.open(consts.SAVE_LOCATION, 'r')
+    Map_Tiles = file[consts.SAVE_HEADER_MAP]
+    Map_Objects = file[consts.SAVE_HEADER_OBJECTS]
+    Player = Map_Objects[file[consts.SAVE_HEADER_PLAYERINDEX]]
+    Player.inventory = file[consts.SAVE_HEADER_INVENTORY]
+    Message_Panel.lines = file[consts.SAVE_HEADER_MESSAGELOG]
+    Game_State = file[consts.SAVE_HEADER_STATE]
+    file.close()
+    initialize_fov()
+
+
+def msgbox(text, width=50):
+    global Console
+    menu(Console, text, [], width)
+
 
 def main():
     global Console, Stats_Panel
@@ -349,8 +421,7 @@ def main():
     Console = libtcod.console_new(consts.SCREEN_WIDTH, consts.SCREEN_HEIGHT)
 
     Stats_Panel = libtcod.console_new(consts.SCREEN_WIDTH, consts.PANEL_HEIGHT)
-    new_game()
-    play_game()
+    main_menu()
 
 
 if __name__ == '__main__':

@@ -9,6 +9,19 @@ TORCH_RADIUS = 10
 FPS_LIMIT = 15
 TILESET = 'tiles.png'
 GAME_TITLE = 'Wrath of Exuleb'
+TITLE_CREDITS = 'By Mike McGivern.\n'\
+	+ 'Many thanks to the /r/roguelikedev and RogueBasin communities.'
+TITLE_IMAGE = 'menu_background.png'
+
+
+# Save Configuration
+SAVE_LOCATION = 'save/savegame'
+SAVE_HEADER_MAP = 'map'
+SAVE_HEADER_OBJECTS = 'objects'
+SAVE_HEADER_PLAYERINDEX = 'player_index'
+SAVE_HEADER_INVENTORY = 'inventory'
+SAVE_HEADER_MESSAGELOG = 'msg_log'
+SAVE_HEADER_STATE = 'game_state'
 
 
 # Map Options
@@ -69,6 +82,8 @@ ITEM_CORPSE_CHAR = '%'
 # Messages
 MESSAGE_GAME_START = 'Welcome, mortal, to the Tomb of Exlueb!'
 MESSAGE_PLAYER_DEATH = 'You have fallen in battle...'
+MESSAGE_NO_SAVE = 'Either there is no saved game to load, '\
+	+ 'or the save file has become corrupt.'
 
 MESSAGE_INVENTORY_OPEN = 'Press the key next to an item to use it.'\
     + 'Press any other key to cancel.\n'

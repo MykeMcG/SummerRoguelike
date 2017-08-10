@@ -22,3 +22,6 @@ class EntityList:
 
     def remove(self, entity):
         self._objects.remove(entity)
+
+    def index(self, entity):
+        return self._objects.index(entity)
