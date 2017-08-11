@@ -379,6 +379,7 @@ def play_game():
         for obj in Map_Objects:
             obj.clear(Console)
         libtcod.console_set_default_foreground(Console, libtcod.white)
+        check_level_up()
         Player_Action = handle_keys(Console, Key, Player, Map_Objects,
                                     Message_Panel)
         if Player_Action == 'exit':
@@ -390,6 +391,40 @@ def play_game():
                     obj.ai.take_turn(Fov_Map, Map_Tiles, Map_Objects,
                                     Message_Panel, Player)
 
+
+def check_level_up():
+    global Player
+    level_up_exp = consts.LEVELUP_BASE + (Player.level * consts.LEVELUP_FACTOR)
+    if Player.fighter.exp >= level_up_exp:
+        Player.level += 1
+        Player.fighter.exp -= level_up_exp
+        Message_Panel.append(consts.MESSAGE_LEVELUP.format(Player.level),
+                             consts.COLOR_MESSAGE_GOOD)
+        show_level_menu()
+
+def show_level_menu():
+    choice = None
+    header = consts.MESSAGE_LEVELUP_MENU
+    constitution = consts.MESSAGE_LEVELUP_CONSTITUTION
+    constitution = constitution.format(increase=consts.LEVELUP_AMOUNT_HP,
+                                       current=Player.fighter.max_hp)
+    strength = consts.MESSAGE_LEVELUP_STRENGTH
+    strength = strength.format(increase=consts.LEVELUP_AMOUNT_STRENGTH,
+                              current=Player.fighter.power)
+    agility = consts.MESSAGE_LEVELUP_AGILITY
+    agility = agility.format(increase=consts.LEVELUP_AMOUNT_AGILITY,
+                             current=Player.fighter.defense)
+    options = [constitution, strength, agility]
+    while choice == None:
+        choice = menu(Console, consts.MESSAGE_LEVELUP_MENU, options,
+                      consts.LEVEL_SCREEN_WIDTH)
+    if choice == 0:
+        Player.fighter.max_hp += consts.LEVELUP_AMOUNT_HP
+        Player.fighter.hp = Player.fighter.max_hp
+    elif choice == 1:
+        Player.fighter.power += consts.LEVELUP_AMOUNT_STRENGTH
+    elif choice == 2:
+        Player.fighter.defense += consts.LEVELUP_AMOUNT_AGILITY
 
 def main_menu():
     global Console

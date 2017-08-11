@@ -4,22 +4,24 @@ import consts
 
 class Fighter:
     # Combat-related properties and methods (monster, player, NPC, etc.)
-    def __init__(self, hp, defense, power, death_function=None, 
+    def __init__(self, hp, defense, power, exp, death_function=None, 
                 invulnerable=False):
         self.max_hp = hp
         self.hp = hp
         self.defense = defense
         self.power = power
+        self.exp = exp
         self.death_function = death_function
         self.invulnerable = invulnerable
 
-    def take_damage(self, damage, object_list, message_panel):
+    def take_damage(self, attacker, damage, object_list, message_panel):
         # apply damage if possible
         if self.invulnerable:
             return
         if damage > 0:
             self.hp -= damage
         if self.hp <= 0:
+            attacker.exp += self.exp
             func = self.death_function
             if func is not None:
                 func(self.owner, object_list, message_panel)
@@ -31,7 +33,7 @@ class Fighter:
             message = '{} attacks {} for {} damage!'
             message = message.format(name, target.name, damage.__str__())
             message_panel.append(message, consts.COLOR_MESSAGE_DANGER)
-            target.fighter.take_damage(damage, object_list, message_panel)
+            target.fighter.take_damage(self, damage, object_list, message_panel)
         else:
             message = '{} attacks {}, but fails to deal any damage.'
             message = message.format(name, target.name.capitalize())

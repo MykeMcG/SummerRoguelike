@@ -13,6 +13,11 @@ TITLE_CREDITS = 'By Mike McGivern.\n'\
 	+ 'Many thanks to the /r/roguelikedev and RogueBasin communities.'
 TITLE_IMAGE = 'menu_background.png'
 STARTING_FLOOR = -15
+LEVELUP_BASE = 30
+LEVELUP_FACTOR = 5
+LEVELUP_AMOUNT_HP = 10
+LEVELUP_AMOUNT_STRENGTH = 1
+LEVELUP_AMOUNT_AGILITY = 1
 
 
 # Save Configuration
@@ -71,6 +76,7 @@ MSG_X = BAR_WIDTH + 2
 MSG_WIDTH = (SCREEN_WIDTH - BAR_WIDTH - 2) - 1
 MSG_HEIGHT = PANEL_HEIGHT - 1
 INVENTORY_WIDTH = 50
+LEVEL_SCREEN_WIDTH = 64
 
 
 # Spell Options
@@ -102,6 +108,12 @@ MESSAGE_NO_SAVE = 'Either there is no saved game to load, '\
 MESSAGE_CHEAT_XRAY = 'CHEAT ACTIVATED: X-Ray Vision'
 MESSAGE_CHEAT_GODMODE = 'CHEAT ACTIVATED: God Mode'
 
+MESSAGE_LEVELUP = 'Your battle skills grow stronger! You reached level {}!'
+MESSAGE_LEVELUP_MENU = 'Level up!\nChoose a stat to raise:\n'
+MESSAGE_LEVELUP_CONSTITUTION = 'Constitution (+{increase}HP, from {current}, '\
+	+ 'fully restore HP)'
+MESSAGE_LEVELUP_STRENGTH = 'Strength (+{increase} attack, from {current})'
+MESSAGE_LEVELUP_AGILITY = 'Agility (+{increase} defense, from {current})'
 MESSAGE_NEXT_FLOOR = 'You take a moment to rest, and recover your strength.\n'\
 	+ 'After a rare moment of peace, you ascend to the next floor of the tomb.'
 
