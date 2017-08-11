@@ -12,6 +12,7 @@ GAME_TITLE = 'Wrath of Exuleb'
 TITLE_CREDITS = 'By Mike McGivern.\n'\
 	+ 'Many thanks to the /r/roguelikedev and RogueBasin communities.'
 TITLE_IMAGE = 'menu_background.png'
+STARTING_FLOOR = -15
 
 
 # Save Configuration
@@ -22,6 +23,8 @@ SAVE_HEADER_PLAYERINDEX = 'player_index'
 SAVE_HEADER_INVENTORY = 'inventory'
 SAVE_HEADER_MESSAGELOG = 'msg_log'
 SAVE_HEADER_STATE = 'game_state'
+SAVE_HEADER_STAIRINDEX = 'stairs_index'
+SAVE_HEADER_DUNGEONLEVEL = 'dungeon_level'
 
 
 # Map Options
@@ -48,11 +51,20 @@ COLOR_MESSAGE_DANGER = libtcod.dark_red
 COLOR_MESSAGE_WARNING = libtcod.orange
 COLOR_MESSAGE_GOOD = libtcod.dark_green
 COLOR_MESSAGE_NEUTRAL = libtcod.white
+COLOR_MESSAGE_CHEAT = libtcod.purple
+COLOR_UI_HEALTH_FRONT = libtcod.red
+COLOR_UI_HEALTH_BACK = libtcod.dark_red
+
 
 
 # UI Options
 BAR_WIDTH = 20
 BAR_TEXT_TEMPLATE = '{name}: {value}/{max}'
+BAR_HEALTH_GODMODE = "GOD MODE"
+UI_FLOORINDICATOR_PREFIX_NEGATIVE = 'B'
+UI_FLOORINDICATOR_PREFIX_POSITIVE = ''
+UI_FLOORINDICATOR_SUFFIX = 'F'
+UI_FLOORINDICATOR_TEMPLATE = 'Dungeon Level: {prefix}{level}{suffix}'
 PANEL_HEIGHT = 7
 PANEL_Y = SCREEN_HEIGHT - PANEL_HEIGHT
 MSG_X = BAR_WIDTH + 2
@@ -77,6 +89,8 @@ ITEM_SCROLLCONFUSE_NAME = 'scroll of confusion'
 ITEM_SCROLLCONFUSE_CHAR = '#'
 ITEM_CORPSE_NAME = '{} remains'
 ITEM_CORPSE_CHAR = '%'
+ENTITY_STAIRSUP_NAME = 'stairs'
+ENTITY_STAIRSUP_CHAR = '>'
 
 
 # Messages
@@ -84,6 +98,12 @@ MESSAGE_GAME_START = 'Welcome, mortal, to the Tomb of Exlueb!'
 MESSAGE_PLAYER_DEATH = 'You have fallen in battle...'
 MESSAGE_NO_SAVE = 'Either there is no saved game to load, '\
 	+ 'or the save file has become corrupt.'
+
+MESSAGE_CHEAT_XRAY = 'CHEAT ACTIVATED: X-Ray Vision'
+MESSAGE_CHEAT_GODMODE = 'CHEAT ACTIVATED: God Mode'
+
+MESSAGE_NEXT_FLOOR = 'You take a moment to rest, and recover your strength.\n'\
+	+ 'After a rare moment of peace, you ascend to the next floor of the tomb.'
 
 MESSAGE_INVENTORY_OPEN = 'Press the key next to an item to use it.'\
     + 'Press any other key to cancel.\n'

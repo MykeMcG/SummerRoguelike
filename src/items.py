@@ -39,6 +39,7 @@ class HealthPotion(Entity):
         super(HealthPotion, self).__init__(x, y, consts.ITEM_HEALTHPOTION_NAME,
                                            consts.ITEM_HEALTHPOTION_CHAR,
                                            libtcod.red, libtcod.BKGND_NONE,
+                                           remain_visible=True,
                                            item=item_component,)
 
 
@@ -50,7 +51,9 @@ class ScrollLightning(Entity):
                                               consts.ITEM_SCROLLLIGHTNING_CHAR,
                                               libtcod.light_yellow,
                                               libtcod.BKGND_NONE,
+                                              remain_visible=True,
                                               item=item_component,)
+
 
 class ScrollConfuse(Entity):
     def __init__(self, x, y):
@@ -60,4 +63,5 @@ class ScrollConfuse(Entity):
                                             consts.ITEM_SCROLLCONFUSE_CHAR,
                                             libtcod.white,
                                             libtcod.BKGND_NONE,
+                                            remain_visible=True,
                                             item=item_component)

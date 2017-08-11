@@ -3,6 +3,7 @@ import random
 from tile import Tile
 import mobs
 import items
+from entity import StairsUp
 from entityList import EntityList
 
 
@@ -18,6 +19,7 @@ class BspMapGenerator:
         self.max_room_monsters = max_room_monsters
         self.max_room_items = max_room_items
         self.player = player
+        self.stairs = None
         self.objects = EntityList()
         self._map = []
         self._rooms = []
@@ -146,6 +148,9 @@ class BspMapGenerator:
             [Tile(True) for y in range(self.map_height)]
             for x in range(self.map_width)
         ]
+        self.stairs = None
+        self.objects = EntityList()
+        self._rooms = []
         return self._map
 
     def _place_objects(self, x1, y1, x2, y2):
@@ -182,7 +187,11 @@ class BspMapGenerator:
                                     self.min_room_size + 1, 1.5, 1.5)
         libtcod.bsp_traverse_inverted_level_order(bsp, self._traverse_node)
 
-        # TODO: Generate stairs
+        stairs_room = random.choice(self._rooms)
+        self._rooms.remove(stairs_room)
+        self.stairs = StairsUp(stairs_room[0], stairs_room[1])
+        self.objects.append(self.stairs)
+        self.objects.send_to_back(self.stairs)
 
         player_room = random.choice(self._rooms)
         self._rooms.remove(player_room)

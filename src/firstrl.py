@@ -7,6 +7,8 @@ from entityList import EntityList
 from bspmapgenerator import BspMapGenerator
 from messagePanel import MessagePanel
 
+# TODO: Change update this file to reflect the change from args to globals
+
 DebugShowWholeMap = False
 
 # Game Variables
@@ -25,6 +27,7 @@ Mouse = None
 Message_Panel = None
 Stats_Panel = None
 Console = None
+Dungeon_Level = consts.STARTING_FLOOR
 
 def handle_keys(console, key, Player, objects, message_panel):
     if key.vk == libtcod.KEY_ENTER and key.lalt:
@@ -35,6 +38,14 @@ def handle_keys(console, key, Player, objects, message_panel):
     elif key.vk == libtcod.KEY_F1 and consts.DEBUG:
         global DebugShowWholeMap
         DebugShowWholeMap = not DebugShowWholeMap  # Toggle DebugShowWholeMap
+        if DebugShowWholeMap:
+            Message_Panel.append(consts.MESSAGE_CHEAT_XRAY,
+                                 consts.COLOR_MESSAGE_CHEAT)
+    elif key.vk == libtcod.KEY_F2 and consts.DEBUG:
+        Player.fighter.invulnerable = not Player.fighter.invulnerable
+        if Player.fighter.invulnerable:
+            Message_Panel.append(consts.MESSAGE_CHEAT_GODMODE,
+                                 consts.COLOR_MESSAGE_CHEAT)
     if Game_State == 'playing':
         # movement keys
         global Fov_Recompute
@@ -67,7 +78,43 @@ def handle_keys(console, key, Player, objects, message_panel):
                                     message_panel=message_panel,
                                     Player=Player, caster=Player,
                                     entities=objects)
+            elif key_char == consts.ENTITY_STAIRSUP_CHAR:
+                if Map_Gen.stairs.x == Player.x \
+                    and Map_Gen.stairs.y == Player.y:
+                    next_level()
             return 'didnt-take-turn'
+
+
+def next_level():
+    global Dungeon_Level
+    Message_Panel.append(consts.MESSAGE_NEXT_FLOOR, consts.COLOR_MESSAGE_GOOD)
+    Player.fighter.heal(player.fighter.max_hp / 2)
+    Dungeon_Level += 1
+    new_map()
+    initialize_fov()
+
+
+def print_level_indicator(panel):
+    message = consts.UI_FLOORINDICATOR_TEMPLATE
+    if Dungeon_Level < 0:
+        prefix = consts.UI_FLOORINDICATOR_PREFIX_NEGATIVE
+        level = Dungeon_Level * -1
+    else:
+        prefix = consts.UI_FLOORINDICATOR_PREFIX_POSITIVE
+        level = Dungeon_Level
+    message = message.format(prefix=prefix, level=level,
+                            suffix=consts.UI_FLOORINDICATOR_SUFFIX)
+    libtcod.console_print_ex(panel, 1, 3, libtcod.BKGND_NONE, libtcod.LEFT,
+                            message)
+
+
+def new_map():
+    global Map_Tiles, Map_Objects
+    Map_Tiles = Map_Gen.generate_map()
+    Map_Objects = EntityList()
+    Map_Objects.append(Player)
+    for obj in Map_Gen.objects:
+        Map_Objects.append(obj)
 
 
 def get_names_under_mouse(mouse, fov_map, objects):
@@ -154,7 +201,7 @@ def render_all(con, stats_panel, message_panel, mouse, fov_map, Player,
                                                         libtcod.BKGND_SET)
                 Map_Tiles[x][y].explored = True
     for obj in objects:
-        obj.draw(con, fov_map, DebugShowWholeMap)
+        obj.draw(con, Map_Tiles, fov_map, DebugShowWholeMap)
     libtcod.console_blit(con, 0, 0, consts.MAP_WIDTH, consts.MAP_HEIGHT, 0, 0, 0)
 
     # Prepare to render the GUI stats_panel
@@ -171,13 +218,15 @@ def render_all(con, stats_panel, message_panel, mouse, fov_map, Player,
                              libtcod.LEFT, 
                              get_names_under_mouse(mouse, fov_map, objects))
 
+    print_level_indicator(stats_panel)
+
     libtcod.console_blit(stats_panel, 0, 0, consts.SCREEN_WIDTH,
                          consts.PANEL_HEIGHT, 0, 0, consts.PANEL_Y)
 
     # Render the message log
     libtcod.console_blit(message_panel.render(), 0, 0, message_panel.width,
                          message_panel.height, 0, consts.MSG_X, consts.PANEL_Y)
-
+    
 
 def generate_fov_map(width, height):
     fov_map = libtcod.map_new(width, height)
@@ -289,11 +338,7 @@ def new_game():
                               consts.ROOM_MIN_SIZE, consts.BSP_RECURSION_DEPTH,
                               consts.BSP_FULL_ROOMS, consts.MAX_ROOM_MONSTERS,
                               consts.MAX_ROOM_ITEMS, Player, Message_Panel)
-    Map_Tiles = Map_Gen.generate_map()
-    Map_Objects = EntityList()
-    Map_Objects.append(Player)
-    for obj in Map_Gen.objects:
-        Map_Objects.append(obj)
+    new_map()
     initialize_fov()
     # TODO: change this to a MessageBuffer or whatever
     Message_Panel = MessagePanel(consts.MSG_WIDTH, consts.MSG_HEIGHT)
@@ -389,11 +434,14 @@ def save_game():
     file[consts.SAVE_HEADER_INVENTORY] = Player.inventory
     file[consts.SAVE_HEADER_MESSAGELOG] = Message_Panel.lines
     file[consts.SAVE_HEADER_STATE] = Game_State
+    file[consts.SAVE_HEADER_DUNGEONLEVEL] = Dungeon_Level
+    file[consts.SAVE_HEADER_STAIRINDEX] = Map_Objects.index(Map_Gen.stairs)
     file.close()
 
 
 def load_game():
-    global Map_Tiles, Map_Objects, Player, Message_Panel, Game_State
+    global Map_Tiles, Map_Objects, Player, Message_Panel, Game_State,\
+        Dungeon_Level
     file = shelve.open(consts.SAVE_LOCATION, 'r')
     Map_Tiles = file[consts.SAVE_HEADER_MAP]
     Map_Objects = file[consts.SAVE_HEADER_OBJECTS]
@@ -401,6 +449,8 @@ def load_game():
     Player.inventory = file[consts.SAVE_HEADER_INVENTORY]
     Message_Panel.lines = file[consts.SAVE_HEADER_MESSAGELOG]
     Game_State = file[consts.SAVE_HEADER_STATE]
+    Dungeon_Level = file[consts.SAVE_HEADER_DUNGEONLEVEL]
+    Map_Gen.stairs = Map_Objects[file[consts.SAVE_HEADER_STAIRINDEX]]
     file.close()
     initialize_fov()
 
@@ -410,7 +460,7 @@ def msgbox(text, width=50):
     menu(Console, text, [], width)
 
 
-def main():
+def init():
     global Console, Stats_Panel
     libtcod.sys_set_fps(consts.FPS_LIMIT)
     libtcod.console_set_custom_font(consts.TILESET, libtcod.FONT_TYPE_GREYSCALE
@@ -425,4 +475,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    init()
