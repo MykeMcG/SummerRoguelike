@@ -10,7 +10,7 @@ FPS_LIMIT = 15
 TILESET = 'tiles.png'
 GAME_TITLE = 'Wrath of Exuleb'
 TITLE_CREDITS = 'By Mike McGivern.\n'\
-	+ 'Many thanks to the /r/roguelikedev and RogueBasin communities.'
+    + 'Many thanks to the /r/roguelikedev and RogueBasin communities.'
 TITLE_IMAGE = 'menu_background.png'
 STARTING_FLOOR = -15
 LEVELUP_BASE = 30
@@ -18,6 +18,11 @@ LEVELUP_FACTOR = 5
 LEVELUP_AMOUNT_HP = 10
 LEVELUP_AMOUNT_STRENGTH = 1
 LEVELUP_AMOUNT_AGILITY = 1
+
+# Player Stats
+PLAYER_INITIAL_HP = 100
+PLAYER_INITIAL_DEFENSE = 1
+PLAYER_INITIAL_POWER = 4
 
 
 # Save Configuration
@@ -39,7 +44,6 @@ MAP_WIDTH = 80
 MAP_HEIGHT = 43
 ROOM_MIN_SIZE = 6
 MAX_ROOMS = 50
-MAX_ROOM_MONSTERS = 2
 MAX_ROOM_ITEMS = 1
 
 
@@ -61,7 +65,6 @@ COLOR_UI_HEALTH_FRONT = libtcod.red
 COLOR_UI_HEALTH_BACK = libtcod.dark_red
 
 
-
 # UI Options
 BAR_WIDTH = 20
 BAR_TEXT_TEMPLATE = '{name}: {value}/{max}'
@@ -80,7 +83,8 @@ LEVEL_SCREEN_WIDTH = 64
 
 
 # Spell Options
-LIGHTNING_DAMAGE = 20
+HEAL_AMOUNT = 40
+LIGHTNING_DAMAGE = 40
 LIGHTNING_RANGE = 5
 CONFUSE_NUM_TURNS = 10
 CONFUSE_RANGE = 8
@@ -89,21 +93,49 @@ CONFUSE_RANGE = 8
 # Items
 ITEM_HEALTHPOTION_NAME = 'health potion'
 ITEM_HEALTHPOTION_CHAR = 173
+ITEM_HEALTHPOTION_SPAWNRATE = 35
 ITEM_SCROLLLIGHTNING_NAME = 'scroll of lightning bolt'
 ITEM_SCROLLLIGHTNING_CHAR = '#'
+ITEM_SCROLLLIGHTNING_SPAWNRATE = [[25, STARTING_FLOOR + 3]]
 ITEM_SCROLLCONFUSE_NAME = 'scroll of confusion'
 ITEM_SCROLLCONFUSE_CHAR = '#'
+ITEM_SCROLLCONFUSE_SPAWNRATE = [[10, STARTING_FLOOR + 1]]
 ITEM_CORPSE_NAME = '{} remains'
 ITEM_CORPSE_CHAR = '%'
 ENTITY_STAIRSUP_NAME = 'stairs'
 ENTITY_STAIRSUP_CHAR = '>'
 
+# Mobs
+MOB_KOBOLD_NAME = 'kobold'
+MOB_KOBOLD_CHAR = 'k'
+MOB_KOBOLD_SPAWNRATE = 20
+MOB_SKELETON_NAME = 'skeleton'
+MOB_SKELETON_CHAR = 's'
+MOB_SKELETON_SPAWNRATE = 80
+MOB_ORC_NAME = 'orc'
+MOB_ORC_CHAR = 'o'
+MOB_ORC_SPAWNRATE = [[15, STARTING_FLOOR + 2],
+                     [30, STARTING_FLOOR + 4], 
+                     [60, STARTING_FLOOR + 6]]
+
+
+# Tables
+TABLE_MAX_ROOM_MOBS = [
+    [2, STARTING_FLOOR],
+    [3, STARTING_FLOOR + 3],
+    [5, STARTING_FLOOR + 5],
+]
+
+TABLE_MAX_ROOM_ITEMS = [
+    [1, STARTING_FLOOR],
+    [2, STARTING_FLOOR + 3],
+]
 
 # Messages
 MESSAGE_GAME_START = 'Welcome, mortal, to the Tomb of Exlueb!'
 MESSAGE_PLAYER_DEATH = 'You have fallen in battle...'
 MESSAGE_NO_SAVE = 'Either there is no saved game to load, '\
-	+ 'or the save file has become corrupt.'
+    + 'or the save file has become corrupt.'
 
 MESSAGE_CHEAT_XRAY = 'CHEAT ACTIVATED: X-Ray Vision'
 MESSAGE_CHEAT_GODMODE = 'CHEAT ACTIVATED: God Mode'
@@ -111,11 +143,11 @@ MESSAGE_CHEAT_GODMODE = 'CHEAT ACTIVATED: God Mode'
 MESSAGE_LEVELUP = 'Your battle skills grow stronger! You reached level {}!'
 MESSAGE_LEVELUP_MENU = 'Level up!\nChoose a stat to raise:\n'
 MESSAGE_LEVELUP_CONSTITUTION = 'Constitution (+{increase}HP, from {current}, '\
-	+ 'fully restore HP)'
+    + 'fully restore HP)'
 MESSAGE_LEVELUP_STRENGTH = 'Strength (+{increase} attack, from {current})'
 MESSAGE_LEVELUP_AGILITY = 'Agility (+{increase} defense, from {current})'
 MESSAGE_NEXT_FLOOR = 'You take a moment to rest, and recover your strength.\n'\
-	+ 'After a rare moment of peace, you ascend to the next floor of the tomb.'
+    + 'After a rare moment of peace, you ascend to the next floor of the tomb.'
 
 MESSAGE_INVENTORY_OPEN = 'Press the key next to an item to use it.'\
     + 'Press any other key to cancel.\n'

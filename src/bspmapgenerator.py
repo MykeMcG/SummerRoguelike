@@ -5,19 +5,19 @@ import mobs
 import items
 from entity import StairsUp
 from entityList import EntityList
+import utils
+import consts
 
 
 class BspMapGenerator:
     def __init__(self, map_width, map_height, min_room_size,
-                 generation_depth, full_rooms, max_room_monsters,
-                 max_room_items, player, message_panel):
+                 generation_depth, full_rooms, level, player, message_panel):
         self.map_width = map_width
         self.map_height = map_height
         self.min_room_size = min_room_size
         self.generation_depth = generation_depth
         self.full_rooms = full_rooms
-        self.max_room_monsters = max_room_monsters
-        self.max_room_items = max_room_items
+        self.level = level
         self.player = player
         self.stairs = None
         self.objects = EntityList()
@@ -154,27 +154,36 @@ class BspMapGenerator:
         return self._map
 
     def _place_objects(self, x1, y1, x2, y2):
-        num_monsters = libtcod.random_get_int(0, 0, self.max_room_monsters)
+        max_monsters = consts.TABLE_MAX_ROOM_MOBS
+        max_monsters = utils.from_dungeon_level(max_monsters, self.level)
+        num_monsters = libtcod.random_get_int(0, 0, max_monsters)
+        mob_table = utils.build_leveled_mob_list(self.level)
         for i in range(num_monsters):
             x = libtcod.random_get_int(0, x1 + 1, x2 - 1)
             y = libtcod.random_get_int(0, y1 + 1, y2 - 1)
-            if libtcod.random_get_int(0, 0, 100) < 80:
+            choice = utils.random_choice_dict(mob_table)
+            if choice == consts.MOB_SKELETON_NAME:
                 monster = mobs.Skeleton(x, y, libtcod.BKGND_NONE)
-            else:
+            elif choice == consts.MOB_KOBOLD_NAME:
                 monster = mobs.Kobold(x, y, libtcod.BKGND_NONE)
+            elif choice == consts.MOB_ORC_NAME:
+                monster = mobs.Orc(x, y, libtcod.BKGND_NONE)
             if not monster.is_blocked(x, y, self._map, self.objects):
                 self.objects.append(monster)
 
-        num_items = libtcod.random_get_int(0, 0, self.max_room_items)
+        max_items = consts.TABLE_MAX_ROOM_ITEMS
+        max_items = utils.from_dungeon_level(max_items, self.level)
+        num_items = libtcod.random_get_int(0, 0, max_items)
+        item_table = utils.build_leveled_item_list(self.level)
         for i in range(num_items):
             x = libtcod.random_get_int(0, x1 + 1, x2 - 1)
             y = libtcod.random_get_int(0, y1 + 1, y2 - 1)
-            dice = libtcod.random_get_int(0, 0, 100)
-            if dice < 70:
+            choice = utils.random_choice_dict(item_table)
+            if choice == consts.ITEM_HEALTHPOTION_NAME:
                 item = items.HealthPotion(x, y)
-            elif dice < 70 + 15:
+            elif choice == consts.ITEM_SCROLLLIGHTNING_NAME:
                 item = items.ScrollLightning(x, y)
-            else:
+            elif choice == consts.ITEM_SCROLLCONFUSE_NAME:
                 item = items.ScrollConfuse(x, y)
             self.objects.append(item)
             self.objects.send_to_back(item)

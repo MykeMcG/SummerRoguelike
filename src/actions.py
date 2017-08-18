@@ -10,7 +10,7 @@ def player_cast_heal(player, message_panel, **kwargs):
 
     message_panel.append(consts.MESSAGE_HEAL_SUCCESS,
                          consts.COLOR_MESSAGE_GOOD)
-    heal_amount = 5
+    heal_amount = consts_HEAL_AMOUNT
     player.fighter.heal(heal_amount)
     return None
 

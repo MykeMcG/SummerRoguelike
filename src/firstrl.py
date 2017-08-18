@@ -78,7 +78,8 @@ def handle_keys(console, key, Player, objects, message_panel):
                                     message_panel=message_panel,
                                     Player=Player, caster=Player,
                                     entities=objects)
-            elif key_char == consts.ENTITY_STAIRSUP_CHAR:
+            # TODO: Figure out why libtcod was so stupid about the > key
+            elif key.shift and key_char == '.':
                 if Map_Gen.stairs.x == Player.x \
                     and Map_Gen.stairs.y == Player.y:
                     next_level()
@@ -88,7 +89,7 @@ def handle_keys(console, key, Player, objects, message_panel):
 def next_level():
     global Dungeon_Level
     Message_Panel.append(consts.MESSAGE_NEXT_FLOOR, consts.COLOR_MESSAGE_GOOD)
-    Player.fighter.heal(player.fighter.max_hp / 2)
+    Player.fighter.heal(Player.fighter.max_hp / 2)
     Dungeon_Level += 1
     new_map()
     initialize_fov()
@@ -226,7 +227,7 @@ def render_all(con, stats_panel, message_panel, mouse, fov_map, Player,
     # Render the message log
     libtcod.console_blit(message_panel.render(), 0, 0, message_panel.width,
                          message_panel.height, 0, consts.MSG_X, consts.PANEL_Y)
-    
+
 
 def generate_fov_map(width, height):
     fov_map = libtcod.map_new(width, height)
@@ -336,8 +337,7 @@ def new_game():
     Player = PlayerClass(Player_X, Player_Y)
     Map_Gen = BspMapGenerator(consts.MAP_WIDTH, consts.MAP_HEIGHT,
                               consts.ROOM_MIN_SIZE, consts.BSP_RECURSION_DEPTH,
-                              consts.BSP_FULL_ROOMS, consts.MAX_ROOM_MONSTERS,
-                              consts.MAX_ROOM_ITEMS, Player, Message_Panel)
+                              consts.BSP_FULL_ROOMS, Dungeon_Level, Player, Message_Panel)
     new_map()
     initialize_fov()
     # TODO: change this to a MessageBuffer or whatever

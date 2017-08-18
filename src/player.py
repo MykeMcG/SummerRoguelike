@@ -6,7 +6,9 @@ import consts
 
 class Player(Entity):
     def __init__(self, x, y):
-        fighter_component = Fighter(hp=30, defense=2, power=5, exp=0)
+        fighter_component = Fighter(hp=consts.PLAYER_INITIAL_HP,
+                             defense=consts.PLAYER_INITIAL_DEFENSE,
+                             power=consts.PLAYER_INITIAL_POWER, exp=0)
         super(Player, self).__init__(x, y, 'the player', '@', libtcod.white,
                                      libtcod.BKGND_NONE, True,
                                      fighter=fighter_component)
