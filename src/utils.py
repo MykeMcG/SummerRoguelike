@@ -44,8 +44,8 @@ def build_leveled_item_list(level):
     item_chances[consts.ITEM_HEALTHPOTION_NAME] = consts.ITEM_HEALTHPOTION_SPAWNRATE
     item_chances[consts.ITEM_SCROLLLIGHTNING_NAME] = from_dungeon_level(consts.ITEM_SCROLLLIGHTNING_SPAWNRATE, level)
     item_chances[consts.ITEM_SCROLLCONFUSE_NAME] = from_dungeon_level(consts.ITEM_SCROLLCONFUSE_SPAWNRATE, level)
-    item_chances[consts.ITEM_SWORDCOPPER_NAME] = from_dungeon_level(consts.ITEM_SWORDCOPPER_SPAWNRATE)
-    item_chances[consts.ITEM_BUCKLERCOPPER_NAME] = from_dungeon_level(consts.ITEM_BUCKLERCOPPER_SPAWNRATE)
+    item_chances[consts.ITEM_SWORDCOPPER_NAME] = from_dungeon_level(consts.ITEM_SWORDCOPPER_SPAWNRATE, level)
+    item_chances[consts.ITEM_BUCKLERCOPPER_NAME] = from_dungeon_level(consts.ITEM_BUCKLERCOPPER_SPAWNRATE, level)
     return item_chances
 
 
