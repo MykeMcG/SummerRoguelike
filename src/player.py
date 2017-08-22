@@ -3,6 +3,7 @@ from entity import Entity
 from entityList import EntityList
 from fighter import Fighter
 import consts
+import utils
 
 class Player(Entity):
     def __init__(self, x, y):
@@ -29,3 +30,4 @@ class Player(Entity):
             self.fighter.attack(target, map_objects, message_panel)
         else:
             self.move(delta_x, delta_y, map_tiles, map_objects)
+

@@ -44,7 +44,10 @@ def build_leveled_item_list(level):
     item_chances[consts.ITEM_HEALTHPOTION_NAME] = consts.ITEM_HEALTHPOTION_SPAWNRATE
     item_chances[consts.ITEM_SCROLLLIGHTNING_NAME] = from_dungeon_level(consts.ITEM_SCROLLLIGHTNING_SPAWNRATE, level)
     item_chances[consts.ITEM_SCROLLCONFUSE_NAME] = from_dungeon_level(consts.ITEM_SCROLLCONFUSE_SPAWNRATE, level)
+    item_chances[consts.ITEM_SWORDCOPPER_NAME] = from_dungeon_level(consts.ITEM_SWORDCOPPER_SPAWNRATE)
+    item_chances[consts.ITEM_BUCKLERCOPPER_NAME] = from_dungeon_level(consts.ITEM_BUCKLERCOPPER_SPAWNRATE)
     return item_chances
+
 
 def build_leveled_mob_list(level):
     mob_chances = {}
@@ -52,3 +55,18 @@ def build_leveled_mob_list(level):
     mob_chances[consts.MOB_SKELETON_NAME] = consts.MOB_SKELETON_SPAWNRATE
     mob_chances[consts.MOB_ORC_NAME] = from_dungeon_level(consts.MOB_ORC_SPAWNRATE, level)
     return mob_chances
+
+
+def get_equipped_in_slot(inventory, slot_to_check):
+    for obj in inventory:
+        if obj.equipment and obj.equipment.slot == slot_to_check \
+            and obj.equipment.is_equipped:
+            return obj.equipment
+    return None
+
+def get_all_equipped(inventory):
+    equipped_list = []
+    for item in inventory:
+        if item.equipment and item.equipment.is_equipped:
+            equipped_list.append(item.equipment)
+    return equipped_list

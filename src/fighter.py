@@ -1,18 +1,22 @@
 import libtcodpy as libtcod
 import consts
+import utils
 
 
 class Fighter:
     # Combat-related properties and methods (monster, player, NPC, etc.)
     def __init__(self, hp, defense, power, exp, death_function=None, 
                 invulnerable=False):
-        self.max_hp = hp
+        self.base_max_hp = hp
         self.hp = hp
-        self.defense = defense
-        self.power = power
+        self.base_defense = defense
+        self.base_power = power
         self.exp = exp
         self.death_function = death_function
         self.invulnerable = invulnerable
+
+
+
 
     def take_damage(self, attacker, damage, object_list, message_panel):
         # apply damage if possible
@@ -43,3 +47,18 @@ class Fighter:
         self.hp += amount
         if self.hp > self.max_hp:
             self.hp = self.max_hp
+
+    @property
+    def power(self):
+        bonus = sum(equipment.power_bonus for equipment in utils.get_all_equipped(self.owner.inventory))
+        return self.base_power + bonus
+
+    @property
+    def defense(self):
+        bonus = sum(equipment.defense_bonus for equipment in utils.get_all_equipped(self.owner.inventory))
+        return self.base_defense + bonus
+
+    @property
+    def max_hp(self):
+        bonus = sum(equipment.max_hp_bonus for equipment in utils.get_all_equipped(self.owner.inventory))
+        return self.base_max_hp + bonus

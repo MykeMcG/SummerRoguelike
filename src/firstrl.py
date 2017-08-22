@@ -76,8 +76,15 @@ def handle_keys(console, key, Player, objects, message_panel):
                 if chosen_item is not None:
                     chosen_item.use(Player.inventory,
                                     message_panel=message_panel,
-                                    Player=Player, caster=Player,
+                                    player=Player, caster=Player,
                                     entities=objects)
+            elif key_char == 'd':
+                chosen_item = show_inventory_menu(console,
+                                                  consts.MESSAGE_INVENTORY_DROP,
+                                                  Player.inventory)
+                if chosen_item is not None:
+                    chosen_item.drop(Player, Map_Objects, Player.inventory,
+                                     message_panel)
             # TODO: Figure out why libtcod was so stupid about the > key
             elif key.shift and key_char == '.':
                 if Map_Gen.stairs.x == Player.x \
@@ -308,7 +315,12 @@ def show_inventory_menu(console, header, inventory):
     if len(inventory) == 0:
         options = [consts.MESSAGE_INVENTORY_EMPTY]
     else:
-        options = [item.name for item in inventory]
+        options = []
+        for item in inventory:
+            text = item.name
+            if item.equipment and item.equipment.is_equipped:
+                text = text + consts.MESSAGE_INVENTORY_EQUIPPED.format(item.equipment.slot)
+            options.append(text)
     index = menu(console, header, options, consts.INVENTORY_WIDTH)
     if index is None or len(inventory) == 0:
         return None
@@ -419,12 +431,12 @@ def show_level_menu():
         choice = menu(Console, consts.MESSAGE_LEVELUP_MENU, options,
                       consts.LEVEL_SCREEN_WIDTH)
     if choice == 0:
-        Player.fighter.max_hp += consts.LEVELUP_AMOUNT_HP
+        Player.fighter.base_max_hp += consts.LEVELUP_AMOUNT_HP
         Player.fighter.hp = Player.fighter.max_hp
     elif choice == 1:
-        Player.fighter.power += consts.LEVELUP_AMOUNT_STRENGTH
+        Player.fighter.base_power += consts.LEVELUP_AMOUNT_STRENGTH
     elif choice == 2:
-        Player.fighter.defense += consts.LEVELUP_AMOUNT_AGILITY
+        Player.fighter.base_defense += consts.LEVELUP_AMOUNT_AGILITY
 
 def main_menu():
     global Console

@@ -102,8 +102,20 @@ ITEM_SCROLLCONFUSE_CHAR = '#'
 ITEM_SCROLLCONFUSE_SPAWNRATE = [[10, STARTING_FLOOR + 1]]
 ITEM_CORPSE_NAME = '{} remains'
 ITEM_CORPSE_CHAR = '%'
+ITEM_SWORDCOPPER_NAME = 'copper sword'
+ITEM_SWORDCOPPER_CHAR = '/'
+ITEM_SWORDCOPPER_SPAWNRATE = [[5, 4]]
+ITEM_BUCKLERCOPPER_NAME = 'copper buckler'
+ITEM_BUCKLERCOPPER_CHAR = '['
+ITEM_BUCKLERCOPPER_SPAWNRATE = [[15, 8]]
+
+
 ENTITY_STAIRSUP_NAME = 'stairs'
 ENTITY_STAIRSUP_CHAR = '>'
+
+# Equipment Slots
+SLOT_RIGHTHAND = 'right hand'
+SLOT_LEFTHAND = 'left hand'
 
 # Mobs
 MOB_KOBOLD_NAME = 'kobold'
@@ -140,6 +152,9 @@ MESSAGE_NO_SAVE = 'Either there is no saved game to load, '\
 MESSAGE_CHEAT_XRAY = 'CHEAT ACTIVATED: X-Ray Vision'
 MESSAGE_CHEAT_GODMODE = 'CHEAT ACTIVATED: God Mode'
 
+MESSAGE_EQUIP = 'Equipped {item} on {slot}.'
+MESSAGE_DEQUIP = 'Dequipped {item} from {slot}.'
+
 MESSAGE_LEVELUP = 'Your battle skills grow stronger! You reached level {}!'
 MESSAGE_LEVELUP_MENU = 'Level up!\nChoose a stat to raise:\n'
 MESSAGE_LEVELUP_CONSTITUTION = 'Constitution (+{increase}HP, from {current}, '\
@@ -151,10 +166,14 @@ MESSAGE_NEXT_FLOOR = 'You take a moment to rest, and recover your strength.\n'\
 
 MESSAGE_INVENTORY_OPEN = 'Press the key next to an item to use it.'\
     + 'Press any other key to cancel.\n'
+MESSAGE_INVENTORY_DROP = 'Press the key next to an item to drop it.' \
+    + 'Press any other key to cancel.\n'
 MESSAGE_INVENTORY_EMPTY = 'Inventory is empty.'
+MESSAGE_INVENTORY_EQUIPPED = ' (on {})'
 
 MESSAGE_ITEM_PICKUP_FAIL = 'Your inventory is full. Unable to pick up {}.'
 MESSAGE_ITEM_PICKUP_SUCCESS = 'You picked up a {}.'
+MESSAGE_ITEM_DROP = 'You drop the {}.'
 MESSAGE_ITEM_USE_NOUSE = 'The {} cannot be used.'
 MESSAGE_ITEM_USE_FAIL = 'Unable to use the {}.'
 MESSAGE_ITEM_USE_SUCCESS = 'Used the {}.'

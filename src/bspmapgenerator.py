@@ -3,6 +3,7 @@ import random
 from tile import Tile
 import mobs
 import items
+import equipment
 from entity import StairsUp
 from entityList import EntityList
 import utils
@@ -185,6 +186,10 @@ class BspMapGenerator:
                 item = items.ScrollLightning(x, y)
             elif choice == consts.ITEM_SCROLLCONFUSE_NAME:
                 item = items.ScrollConfuse(x, y)
+            elif choice == consts.ITEM_SWORDCOPPER_NAME:
+                item = equipment.SwordCopper(x, y)
+            elif choice == consts.ITEM_BUCKLERCOPPER_NAME:
+                item = equipment.BucklerCopper(x, y)
             self.objects.append(item)
             self.objects.send_to_back(item)
 
